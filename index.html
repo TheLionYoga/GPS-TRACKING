@@ -3,1032 +3,399 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GPS Tracker Offline</title>
+  <title>GPS Coordinate Tracker</title>
   <script src="/_sdk/data_sdk.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    html {
-      height: 100%;
-    }
-
-    .container {
-      width: 90%;
-      max-width: 600px;
-      background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      padding: 30px;
-      margin: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      color: #667eea;
-      margin: 0 0 10px 0;
-      font-size: 28px;
-    }
-
-    .status {
-      text-align: center;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      font-weight: 600;
-      font-size: 16px;
-    }
-
-    .status.active {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .status.inactive {
-      background: #f8d7da;
-      color: #721c24;
-    }
-
-    .status.waiting {
-      background: #fff3cd;
-      color: #856404;
-    }
-
-    .gps-help {
-      background: #e7f3ff;
-      border: 2px solid #0066cc;
-      border-radius: 10px;
-      padding: 15px;
-      margin-bottom: 20px;
-      display: none;
-    }
-
-    .gps-help.show {
-      display: block;
-    }
-
-    .gps-help h3 {
-      margin: 0 0 10px 0;
-      color: #0066cc;
-      font-size: 16px;
-    }
-
-    .gps-help ol {
-      margin: 10px 0;
-      padding-left: 20px;
-    }
-
-    .gps-help li {
-      margin: 5px 0;
-      font-size: 14px;
-    }
-
-    .current-location {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    .location-item {
-      display: flex;
-      justify-content: space-between;
-      margin: 10px 0;
-      font-size: 14px;
-    }
-
-    .location-label {
-      font-weight: 600;
-      color: #495057;
-    }
-
-    .location-value {
-      color: #667eea;
-      font-family: 'Courier New', monospace;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      flex: 1;
-      min-width: 120px;
-      padding: 15px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-primary {
-      background: #667eea;
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: #5568d3;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-primary:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .btn-secondary {
-      background: #6c757d;
-      color: white;
-    }
-
-    .btn-secondary:hover {
-      background: #5a6268;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
-    }
-
-    .btn-warning {
-      background: #ffc107;
-      color: #212529;
-    }
-
-    .btn-warning:hover {
-      background: #e0a800;
-    }
-
-    .records-section {
-      margin-top: 30px;
-    }
-
-    .records-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .records-header h2 {
-      margin: 0;
-      color: #495057;
-      font-size: 20px;
-    }
-
-    .record-count {
-      background: #667eea;
-      color: white;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .records-list {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-
-    .record-item {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      position: relative;
-    }
-
-    .record-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .record-time {
-      font-size: 12px;
-      color: #6c757d;
-    }
-
-    .record-coords {
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      color: #495057;
-      margin: 5px 0;
-    }
-
-    .delete-btn {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .delete-btn:hover {
-      background: #c82333;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: #6c757d;
-    }
-
-    .empty-state svg {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 15px;
-      opacity: 0.5;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #28a745;
-      color: white;
-      padding: 15px 30px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      display: none;
-      z-index: 1000;
-      max-width: 90%;
-      text-align: center;
-    }
-
-    .toast.show {
-      display: block;
-      animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateX(-50%) translateY(100px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .loading {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border: 2px solid #ffffff;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 0.6s linear infinite;
-      margin-left: 8px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.5; }
-      100% { opacity: 1; }
-    }
-  </style>
+        body {
+            box-sizing: border-box;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        html {
+            height: 100%;
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .location-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 24px;
+            color: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .coordinate-display {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 8px 0;
+        }
+        .history-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 8px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+    </style>
   <style>@view-transition { navigation: auto; }</style>
-  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
- <body>
-  <div class="container">
-   <h1 id="app-title">GPS Tracker Offline</h1>
-   <div id="status" class="status inactive pulse">
-    🔍 Memulai GPS...
-   </div>
-   <div id="gps-help" class="gps-help">
-    <h3>📍 Cara Mengaktifkan GPS:</h3>
-    <ol>
-     <li><strong>Izinkan Lokasi:</strong> Klik "Izinkan" atau "Allow" saat browser meminta akses lokasi</li>
-     <li><strong>Aktifkan GPS:</strong> Pastikan GPS/Lokasi aktif di pengaturan perangkat</li>
-     <li><strong>Keluar Ruangan:</strong> GPS bekerja lebih baik di area terbuka</li>
-     <li><strong>Tunggu Sebentar:</strong> Proses pencarian sinyal membutuhkan waktu 10-30 detik</li>
-     <li><strong>Jika Masih Gagal:</strong> Gunakan tombol "Input Manual" di bawah untuk memasukkan koordinat secara manual</li>
-    </ol>
-    <div id="gps-diagnostics" style="background: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 15px; font-size: 12px;">
-     <h4 style="margin: 0 0 8px 0; color: #856404;">🔧 Diagnostik GPS:</h4>
-     <div id="diagnostic-info">
-      <div>
-       Browser: <span id="browser-info">-</span>
+ <body class="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100">
+  <main class="container mx-auto px-4 py-6 max-w-4xl"><!-- Header -->
+   <header class="text-center mb-8">
+    <h1 id="app-title" class="text-4xl font-bold text-gray-800 mb-2">GPS Coordinate Tracker</h1>
+    <p class="text-gray-600">Dapatkan koordinat GPS Anda dengan akurat</p>
+   </header><!-- Current Location Card -->
+   <div class="location-card mb-8">
+    <div class="flex items-center justify-between mb-4">
+     <h2 class="text-2xl font-semibold">📍 Lokasi Saat Ini</h2>
+     <div id="status-indicator" class="w-3 h-3 bg-gray-400 rounded-full"></div>
+    </div>
+    <div id="location-display" class="space-y-4">
+     <div class="coordinate-display">
+      <div class="text-sm opacity-80 mb-1">
+       Latitude
       </div>
-      <div>
-       Platform: <span id="platform-info">-</span>
+      <div id="latitude-display" class="text-2xl font-mono">
+       -
       </div>
-      <div>
-       HTTPS: <span id="https-info">-</span>
+     </div>
+     <div class="coordinate-display">
+      <div class="text-sm opacity-80 mb-1">
+       Longitude
       </div>
-      <div>
-       Geolocation Support: <span id="geo-support">-</span>
+      <div id="longitude-display" class="text-2xl font-mono">
+       -
       </div>
-      <div>
-       Permission Status: <span id="permission-status">-</span>
+     </div>
+     <div class="coordinate-display">
+      <div class="text-sm opacity-80 mb-1">
+       Akurasi
+      </div>
+      <div id="accuracy-display" class="text-lg">
+       -
+      </div>
+     </div>
+     <div class="coordinate-display">
+      <div class="text-sm opacity-80 mb-1">
+       Waktu
+      </div>
+      <div id="timestamp-display" class="text-lg">
+       -
       </div>
      </div>
     </div>
-   </div>
-   <div class="current-location">
-    <div class="location-item"><span class="location-label">Latitude:</span> <span class="location-value" id="current-lat">-</span>
+    <div class="flex gap-4 mt-6"><button id="get-location-btn" class="flex-1 bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"> 🎯 <span id="tracking-button-text">Dapatkan Lokasi Saya</span> </button> <button id="save-location-btn" class="flex-1 bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled> 💾 <span id="save-button-text">Simpan Lokasi</span> </button>
     </div>
-    <div class="location-item"><span class="location-label">Longitude:</span> <span class="location-value" id="current-lng">-</span>
+    <div id="maps-link" class="mt-4 hidden"><a id="google-maps-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"> 🗺️ Buka di Google Maps </a>
     </div>
-    <div class="location-item"><span class="location-label">Akurasi:</span> <span class="location-value" id="current-accuracy">-</span>
-    </div>
-   </div>
-   <div class="button-group"><button id="record-btn" class="btn-primary" disabled> <span id="record-btn-text">Rekam Lokasi</span> </button> <button id="retry-gps-btn" class="btn-warning" style="display: none;"> 🔄 Coba Lagi GPS </button> <button id="manual-btn" class="btn-warning" style="display: none;"> 📝 Input Manual </button> <button id="help-btn" class="btn-secondary"> ❓ Bantuan GPS </button> <button id="tech-info-btn" class="btn-secondary"> 🔧 Info Teknologi </button> <button id="export-btn" class="btn-secondary"> <span id="export-btn-text">Ekspor Data</span> </button>
-   </div>
-   <div id="manual-input" class="gps-help" style="display: none;">
-    <h3>📝 Input Koordinat Manual:</h3>
-    <div style="margin: 15px 0;"><label for="manual-lat" style="display: block; margin-bottom: 5px; font-weight: 600;">Latitude:</label> <input type="number" id="manual-lat" step="any" placeholder="-6.200000" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;"> <label for="manual-lng" style="display: block; margin-bottom: 5px; font-weight: 600;">Longitude:</label> <input type="number" id="manual-lng" step="any" placeholder="106.816666" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 15px;">
-     <div style="display: flex; gap: 10px;"><button id="save-manual-btn" class="btn-primary" style="flex: 1;">💾 Simpan Koordinat</button> <button id="cancel-manual-btn" class="btn-secondary" style="flex: 1;">❌ Batal</button>
+   </div><!-- Location History -->
+   <div class="bg-white rounded-2xl p-6 shadow-lg">
+    <div class="flex items-center justify-between mb-6">
+     <h2 class="text-2xl font-bold text-gray-800">📋 Riwayat Lokasi</h2>
+     <div id="location-count" class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-semibold">
+      0 lokasi tersimpan
      </div>
     </div>
-    <p style="font-size: 12px; color: #666; margin: 10px 0 0 0;"><strong>Tips:</strong> Anda bisa mendapatkan koordinat dari Google Maps dengan klik kanan pada lokasi dan pilih koordinat yang muncul.</p>
-   </div>
-   <div id="tech-info" class="gps-help" style="display: none;">
-    <h3>🔧 Teknologi yang Digunakan:</h3>
-    <div style="margin: 15px 0;">
-     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">🌐 Frontend Technologies:</h4>
-     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
-      <li><strong>HTML5:</strong> Struktur halaman web modern</li>
-      <li><strong>CSS3:</strong> Styling dengan gradients, animations, flexbox</li>
-      <li><strong>JavaScript (ES6+):</strong> Logika aplikasi dan interaksi</li>
-      <li><strong>Responsive Design:</strong> Tampilan optimal di semua perangkat</li>
-     </ul>
-     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">📍 GPS &amp; Location APIs:</h4>
-     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
-      <li><strong>Geolocation API:</strong> Akses GPS perangkat</li>
-      <li><strong>getCurrentPosition():</strong> Mendapatkan lokasi saat ini</li>
-      <li><strong>watchPosition():</strong> Tracking lokasi real-time</li>
-      <li><strong>Coordinate System:</strong> Latitude/Longitude (WGS84)</li>
-     </ul>
-     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">💾 Data Storage:</h4>
-     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
-      <li><strong>Canva Data SDK:</strong> Penyimpanan data ke Canva Sheet</li>
-      <li><strong>CRUD Operations:</strong> Create, Read, Update, Delete</li>
-      <li><strong>Real-time Sync:</strong> Data tersinkronisasi otomatis</li>
-      <li><strong>Offline Capable:</strong> Bekerja tanpa koneksi internet</li>
-     </ul>
-     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">🎨 UI/UX Features:</h4>
-     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
-      <li><strong>Canva Elements SDK:</strong> Customizable colors &amp; fonts</li>
-      <li><strong>Toast Notifications:</strong> Feedback pengguna real-time</li>
-      <li><strong>Loading States:</strong> Indikator proses yang sedang berjalan</li>
-      <li><strong>Error Handling:</strong> Penanganan error yang user-friendly</li>
-     </ul>
-     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">📤 Export &amp; Compatibility:</h4>
-     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
-      <li><strong>CSV Export:</strong> Download data dalam format spreadsheet</li>
-      <li><strong>Blob API:</strong> Pembuatan file di browser</li>
-      <li><strong>Cross-browser:</strong> Chrome, Safari, Firefox, Edge</li>
-      <li><strong>Mobile Responsive:</strong> Android &amp; iOS compatible</li>
-     </ul>
-     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">🔒 Security &amp; Privacy:</h4>
-     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
-      <li><strong>Permission-based:</strong> Meminta izin akses lokasi</li>
-      <li><strong>Local Processing:</strong> Data diproses di perangkat</li>
-      <li><strong>No External APIs:</strong> Tidak mengirim data ke server luar</li>
-      <li><strong>Sandboxed:</strong> Berjalan dalam iframe yang aman</li>
-     </ul>
-    </div>
-    <div style="background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 15px;">
-     <p style="margin: 0; font-size: 12px; color: #0066cc;"><strong>💡 Fun Fact:</strong> Aplikasi ini menggunakan teknologi web modern yang sama dengan aplikasi mobile native, namun berjalan langsung di browser tanpa perlu instalasi!</p>
-    </div><button id="close-tech-info-btn" class="btn-secondary" style="width: 100%; margin-top: 15px;">❌ Tutup</button>
-   </div>
-   <div class="records-section">
-    <div class="records-header">
-     <h2>Riwayat Rekaman</h2><span class="record-count" id="record-count">0</span>
-    </div>
-    <div class="records-list" id="records-list">
-     <div class="empty-state">
-      <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path> <circle cx="12" cy="10" r="3"></circle>
-      </svg>
-      <p>Belum ada lokasi yang direkam</p>
+    <div id="history-list" class="space-y-4">
+     <div class="text-center text-gray-500 py-8">
+      Belum ada lokasi yang tersimpan. Klik "Dapatkan Lokasi Saya" untuk memulai!
      </div>
     </div>
+   </div><!-- Loading Overlay -->
+   <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 text-center">
+     <div class="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+     <p class="text-gray-700">Mendapatkan lokasi Anda...</p>
+    </div>
    </div>
-  </div>
-  <div id="toast" class="toast"></div>
+  </main>
   <script>
-    const defaultConfig = {
-      app_title: "GPS Tracker Offline",
-      record_button_text: "Rekam Lokasi",
-      export_button_text: "Ekspor Data",
-      primary_color: "#667eea",
-      surface_color: "#f8f9fa",
-      text_color: "#495057",
-      button_color: "#667eea",
-      secondary_button_color: "#6c757d"
-    };
+        // Configuration
+        const defaultConfig = {
+            app_title: "GPS Coordinate Tracker",
+            tracking_button_text: "Dapatkan Lokasi Saya",
+            save_button_text: "Simpan Lokasi"
+        };
 
-    let currentPosition = null;
-    let watchId = null;
-    let allRecords = [];
-    let isRecording = false;
-    let gpsRetryCount = 0;
+        // Global state
+        let currentLocation = null;
+        let locationHistory = [];
+        let isTracking = false;
 
-    const dataHandler = {
-      onDataChanged(data) {
-        allRecords = data;
-        renderRecords(data);
-        updateRecordCount(data.length);
-      }
-    };
+        // DOM elements
+        const elements = {
+            getLocationBtn: document.getElementById('get-location-btn'),
+            saveLocationBtn: document.getElementById('save-location-btn'),
+            latitudeDisplay: document.getElementById('latitude-display'),
+            longitudeDisplay: document.getElementById('longitude-display'),
+            accuracyDisplay: document.getElementById('accuracy-display'),
+            timestampDisplay: document.getElementById('timestamp-display'),
+            statusIndicator: document.getElementById('status-indicator'),
+            mapsLink: document.getElementById('maps-link'),
+            googleMapsLink: document.getElementById('google-maps-link'),
+            historyList: document.getElementById('history-list'),
+            locationCount: document.getElementById('location-count'),
+            loadingOverlay: document.getElementById('loading-overlay')
+        };
 
-    async function onConfigChange(config) {
-      const appTitle = config.app_title || defaultConfig.app_title;
-      const recordBtnText = config.record_button_text || defaultConfig.record_button_text;
-      const exportBtnText = config.export_button_text || defaultConfig.export_button_text;
-      const primaryColor = config.primary_color || defaultConfig.primary_color;
-      const surfaceColor = config.surface_color || defaultConfig.surface_color;
-      const textColor = config.text_color || defaultConfig.text_color;
-      const buttonColor = config.button_color || defaultConfig.button_color;
-      const secondaryButtonColor = config.secondary_button_color || defaultConfig.secondary_button_color;
-
-      document.getElementById('app-title').textContent = appTitle;
-      document.getElementById('record-btn-text').textContent = recordBtnText;
-      document.getElementById('export-btn-text').textContent = exportBtnText;
-
-      document.getElementById('app-title').style.color = primaryColor;
-      document.querySelectorAll('.btn-primary').forEach(btn => {
-        btn.style.background = buttonColor;
-      });
-      document.querySelectorAll('.btn-secondary').forEach(btn => {
-        btn.style.background = secondaryButtonColor;
-      });
-      document.querySelector('.record-count').style.background = primaryColor;
-      document.querySelectorAll('.location-value').forEach(el => {
-        el.style.color = primaryColor;
-      });
-    }
-
-    function mapToCapabilities(config) {
-      return {
-        recolorables: [
-          {
-            get: () => config.primary_color || defaultConfig.primary_color,
-            set: (value) => {
-              config.primary_color = value;
-              if (window.elementSdk) window.elementSdk.setConfig({ primary_color: value });
+        // Data SDK Handler
+        const dataHandler = {
+            onDataChanged(data) {
+                locationHistory = data;
+                updateHistoryDisplay();
+                updateLocationCount();
             }
-          },
-          {
-            get: () => config.surface_color || defaultConfig.surface_color,
-            set: (value) => {
-              config.surface_color = value;
-              if (window.elementSdk) window.elementSdk.setConfig({ surface_color: value });
+        };
+
+        // Initialize Data SDK
+        async function initializeDataSDK() {
+            if (window.dataSdk) {
+                const result = await window.dataSdk.init(dataHandler);
+                if (!result.isOk) {
+                    console.error('Failed to initialize Data SDK');
+                }
             }
-          },
-          {
-            get: () => config.text_color || defaultConfig.text_color,
-            set: (value) => {
-              config.text_color = value;
-              if (window.elementSdk) window.elementSdk.setConfig({ text_color: value });
-            }
-          },
-          {
-            get: () => config.button_color || defaultConfig.button_color,
-            set: (value) => {
-              config.button_color = value;
-              if (window.elementSdk) window.elementSdk.setConfig({ button_color: value });
-            }
-          },
-          {
-            get: () => config.secondary_button_color || defaultConfig.secondary_button_color,
-            set: (value) => {
-              config.secondary_button_color = value;
-              if (window.elementSdk) window.elementSdk.setConfig({ secondary_button_color: value });
-            }
-          }
-        ],
-        borderables: [],
-        fontEditable: undefined,
-        fontSizeable: undefined
-      };
-    }
-
-    function mapToEditPanelValues(config) {
-      return new Map([
-        ["app_title", config.app_title || defaultConfig.app_title],
-        ["record_button_text", config.record_button_text || defaultConfig.record_button_text],
-        ["export_button_text", config.export_button_text || defaultConfig.export_button_text]
-      ]);
-    }
-
-    async function initApp() {
-      if (window.elementSdk) {
-        await window.elementSdk.init({
-          defaultConfig,
-          onConfigChange,
-          mapToCapabilities,
-          mapToEditPanelValues
-        });
-      }
-
-      const initResult = await window.dataSdk.init(dataHandler);
-      if (!initResult.isOk) {
-        showToast('Gagal menginisialisasi penyimpanan data', 'error');
-        return;
-      }
-
-      setupEventListeners();
-      updateDiagnostics();
-      initGPS();
-    }
-
-    function updateDiagnostics() {
-      // Update browser info
-      const userAgent = navigator.userAgent;
-      let browserName = 'Unknown';
-      if (userAgent.includes('Chrome')) browserName = 'Chrome';
-      else if (userAgent.includes('Firefox')) browserName = 'Firefox';
-      else if (userAgent.includes('Safari')) browserName = 'Safari';
-      else if (userAgent.includes('Edge')) browserName = 'Edge';
-      
-      document.getElementById('browser-info').textContent = browserName;
-      document.getElementById('platform-info').textContent = navigator.platform || 'Unknown';
-      document.getElementById('https-info').textContent = location.protocol === 'https:' ? '✅ Ya' : '❌ Tidak';
-      document.getElementById('geo-support').textContent = navigator.geolocation ? '✅ Didukung' : '❌ Tidak Didukung';
-      
-      // Check permission status
-      if (navigator.permissions) {
-        navigator.permissions.query({name: 'geolocation'}).then(function(result) {
-          let status = result.state;
-          if (status === 'granted') {
-            document.getElementById('permission-status').textContent = '✅ Diizinkan';
-          } else if (status === 'denied') {
-            document.getElementById('permission-status').textContent = '❌ Ditolak';
-          } else {
-            document.getElementById('permission-status').textContent = '⏳ Belum Ditanya';
-          }
-        }).catch(() => {
-          document.getElementById('permission-status').textContent = '❓ Tidak Diketahui';
-        });
-      } else {
-        document.getElementById('permission-status').textContent = '❓ Tidak Didukung';
-      }
-    }
-
-    function initGPS() {
-      gpsRetryCount++;
-      
-      if (!navigator.geolocation) {
-        updateStatus('❌ GPS tidak didukung di browser ini', 'inactive');
-        showToast('Browser tidak mendukung GPS. Gunakan Chrome, Safari, atau Firefox terbaru.', 'error');
-        showRetryButton();
-        return;
-      }
-
-      updateStatus('🔍 Meminta izin akses lokasi...', 'waiting');
-      
-      // Tampilkan bantuan GPS otomatis
-      document.getElementById('gps-help').classList.add('show');
-      
-      if (gpsRetryCount === 1) {
-        showToast('PENTING: Klik "Izinkan" atau "Allow" saat browser meminta akses lokasi!', 'info');
-      }
-
-      // Strategi bertahap: coba beberapa konfigurasi berbeda
-      const strategies = [
-        {
-          name: 'Basic GPS',
-          options: {
-            enableHighAccuracy: false,
-            maximumAge: 300000, // 5 menit
-            timeout: 10000 // 10 detik
-          }
-        },
-        {
-          name: 'Network Location',
-          options: {
-            enableHighAccuracy: false,
-            maximumAge: 600000, // 10 menit
-            timeout: 15000 // 15 detik
-          }
-        },
-        {
-          name: 'High Accuracy GPS',
-          options: {
-            enableHighAccuracy: true,
-            maximumAge: 60000, // 1 menit
-            timeout: 20000 // 20 detik
-          }
-        },
-        {
-          name: 'Fallback Mode',
-          options: {
-            enableHighAccuracy: false,
-            maximumAge: 900000, // 15 menit
-            timeout: 30000 // 30 detik
-          }
-        }
-      ];
-
-      let currentStrategy = 0;
-
-      function tryNextStrategy() {
-        if (currentStrategy >= strategies.length) {
-          // Semua strategi gagal, tampilkan error dan tombol manual
-          updateStatus('❌ GPS tidak dapat diaktifkan', 'inactive');
-          showRetryButton();
-          showToast('GPS tidak dapat diaktifkan. Gunakan "Input Manual" untuk memasukkan koordinat.', 'error');
-          return;
         }
 
-        const strategy = strategies[currentStrategy];
-        updateStatus(`🔍 Mencoba ${strategy.name}... (${currentStrategy + 1}/${strategies.length})`, 'waiting');
-        
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            // Berhasil mendapat posisi
-            currentPosition = position;
-            updateCurrentLocation(position);
-            updateStatus(`✅ GPS Aktif (${strategy.name})`, 'active');
-            document.getElementById('record-btn').disabled = false;
-            hideRetryButton();
-            document.getElementById('gps-help').classList.remove('show');
+        // Get current location
+        function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                showError('Geolocation tidak didukung oleh browser Anda');
+                return;
+            }
+
+            isTracking = true;
+            elements.loadingOverlay.classList.remove('hidden');
+            elements.getLocationBtn.disabled = true;
+            elements.statusIndicator.className = 'w-3 h-3 bg-yellow-400 rounded-full pulse';
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude, accuracy } = position.coords;
+                    const timestamp = new Date().toISOString();
+                    
+                    currentLocation = {
+                        latitude,
+                        longitude,
+                        accuracy,
+                        timestamp
+                    };
+
+                    displayCurrentLocation(currentLocation);
+                    elements.loadingOverlay.classList.add('hidden');
+                    elements.getLocationBtn.disabled = false;
+                    elements.saveLocationBtn.disabled = false;
+                    elements.statusIndicator.className = 'w-3 h-3 bg-green-400 rounded-full';
+                    isTracking = false;
+                },
+                (error) => {
+                    let errorMessage = 'Gagal mendapatkan lokasi';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Akses lokasi ditolak. Silakan izinkan akses lokasi di browser Anda.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Informasi lokasi tidak tersedia.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Waktu habis saat mencari lokasi.';
+                            break;
+                    }
+                    showError(errorMessage);
+                    elements.loadingOverlay.classList.add('hidden');
+                    elements.getLocationBtn.disabled = false;
+                    elements.statusIndicator.className = 'w-3 h-3 bg-red-400 rounded-full';
+                    isTracking = false;
+                },
+                options
+            );
+        }
+
+        // Display current location
+        function displayCurrentLocation(location) {
+            elements.latitudeDisplay.textContent = location.latitude.toFixed(6);
+            elements.longitudeDisplay.textContent = location.longitude.toFixed(6);
+            elements.accuracyDisplay.textContent = `±${Math.round(location.accuracy)} meter`;
+            elements.timestampDisplay.textContent = new Date(location.timestamp).toLocaleString('id-ID');
+
+            // Show Google Maps link
+            const mapsUrl = `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
+            elements.googleMapsLink.href = mapsUrl;
+            elements.mapsLink.classList.remove('hidden');
+        }
+
+        // Save location to Data SDK
+        async function saveLocation() {
+            if (!currentLocation || !window.dataSdk) return;
+
+            elements.saveLocationBtn.disabled = true;
+            elements.saveLocationBtn.innerHTML = '⏳ Menyimpan...';
+
+            const locationData = {
+                id: Date.now().toString(),
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+                accuracy: currentLocation.accuracy,
+                timestamp: currentLocation.timestamp,
+                address: `${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}`
+            };
+
+            const result = await window.dataSdk.create(locationData);
             
-            showToast(`🎉 GPS berhasil aktif dengan ${strategy.name}!`, 'success');
-            
-            // Mulai tracking kontinyu
-            startContinuousTracking();
-          },
-          (error) => {
-            console.log(`GPS Error (${strategy.name}):`, error.code, error.message);
-            
-            // Coba strategi berikutnya setelah delay singkat
-            currentStrategy++;
-            setTimeout(tryNextStrategy, 2000);
-          },
-          strategy.options
-        );
-      }
+            if (result.isOk) {
+                showSuccess('Lokasi berhasil disimpan!');
+            } else {
+                showError('Gagal menyimpan lokasi. Silakan coba lagi.');
+            }
 
-      // Mulai dengan strategi pertama
-      tryNextStrategy();
-    }
-
-    function startContinuousTracking() {
-      if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-      }
-
-      watchId = navigator.geolocation.watchPosition(
-        (position) => {
-          currentPosition = position;
-          updateCurrentLocation(position);
-          
-          // Update status jika akurasi berubah signifikan
-          if (position.coords.accuracy <= 50) {
-            updateStatus('✅ GPS Aktif - Akurasi Tinggi', 'active');
-          } else if (position.coords.accuracy <= 100) {
-            updateStatus('✅ GPS Aktif - Akurasi Sedang', 'active');
-          } else {
-            updateStatus('✅ GPS Aktif - Akurasi Rendah', 'active');
-          }
-        },
-        (error) => {
-          // Jangan langsung error pada tracking kontinyu
-          console.log('GPS tracking error:', error);
-        },
-        {
-          enableHighAccuracy: true,
-          maximumAge: 60000,
-          timeout: 30000
+            elements.saveLocationBtn.disabled = false;
+            elements.saveLocationBtn.innerHTML = `💾 <span id="save-button-text">${window.elementSdk?.config?.save_button_text || defaultConfig.save_button_text}</span>`;
         }
-      );
-    }
 
-    function handleGPSError(error) {
-      let message = '❌ GPS Tidak Aktif';
-      let suggestion = '';
-      
-      if (error.code === 1) {
-        message = '❌ Izin lokasi ditolak';
-        suggestion = 'Klik ikon gembok/lokasi di address bar browser, pilih "Izinkan", lalu klik tombol "Coba Lagi GPS".';
-      } else if (error.code === 2) {
-        message = '📍 Lokasi tidak tersedia';
-        suggestion = 'Pastikan GPS aktif di pengaturan perangkat dan coba pindah ke luar ruangan. Sinyal GPS tidak bekerja baik di dalam gedung.';
-      } else if (error.code === 3) {
-        message = '⏱️ Timeout mendapatkan lokasi';
-        suggestion = 'Sinyal GPS lemah. Pindah ke area terbuka (luar ruangan) dan tunggu beberapa saat, lalu coba lagi.';
-      }
-      
-      updateStatus(message, 'inactive');
-      document.getElementById('record-btn').disabled = true;
-      showRetryButton();
-      showToast(suggestion, 'error');
-    }
+        // Update history display
+        function updateHistoryDisplay() {
+            if (locationHistory.length === 0) {
+                elements.historyList.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        Belum ada lokasi yang tersimpan. Klik "Dapatkan Lokasi Saya" untuk memulai!
+                    </div>
+                `;
+                return;
+            }
 
-    function updateStatus(message, type) {
-      const statusEl = document.getElementById('status');
-      statusEl.textContent = message;
-      statusEl.className = `status ${type}`;
-      
-      if (type === 'waiting') {
-        statusEl.classList.add('pulse');
-      } else {
-        statusEl.classList.remove('pulse');
-      }
-    }
+            const sortedHistory = [...locationHistory].sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
 
-    function updateCurrentLocation(position) {
-      document.getElementById('current-lat').textContent = position.coords.latitude.toFixed(6);
-      document.getElementById('current-lng').textContent = position.coords.longitude.toFixed(6);
-      document.getElementById('current-accuracy').textContent = `±${position.coords.accuracy.toFixed(1)}m`;
-    }
-
-    function setupEventListeners() {
-      document.getElementById('record-btn').addEventListener('click', recordLocation);
-      document.getElementById('export-btn').addEventListener('click', exportData);
-      document.getElementById('retry-gps-btn').addEventListener('click', retryGPS);
-      document.getElementById('help-btn').addEventListener('click', toggleHelp);
-      document.getElementById('tech-info-btn').addEventListener('click', showTechInfo);
-      document.getElementById('close-tech-info-btn').addEventListener('click', hideTechInfo);
-      document.getElementById('manual-btn').addEventListener('click', showManualInput);
-      document.getElementById('save-manual-btn').addEventListener('click', saveManualCoordinates);
-      document.getElementById('cancel-manual-btn').addEventListener('click', hideManualInput);
-    }
-
-    function showRetryButton() {
-      document.getElementById('retry-gps-btn').style.display = 'block';
-      document.getElementById('manual-btn').style.display = 'block';
-    }
-
-    function hideRetryButton() {
-      document.getElementById('retry-gps-btn').style.display = 'none';
-      document.getElementById('manual-btn').style.display = 'none';
-    }
-
-    function retryGPS() {
-      hideRetryButton();
-      if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-      }
-      currentPosition = null;
-      document.getElementById('current-lat').textContent = '-';
-      document.getElementById('current-lng').textContent = '-';
-      document.getElementById('current-accuracy').textContent = '-';
-      
-      showToast('Mencoba mengaktifkan GPS lagi...', 'info');
-      setTimeout(initGPS, 1000);
-    }
-
-    function toggleHelp() {
-      const helpEl = document.getElementById('gps-help');
-      if (helpEl.classList.contains('show')) {
-        helpEl.classList.remove('show');
-      } else {
-        helpEl.classList.add('show');
-        showToast('Ikuti panduan di atas untuk mengaktifkan GPS', 'info');
-      }
-    }
-
-    function showTechInfo() {
-      document.getElementById('tech-info').style.display = 'block';
-      document.getElementById('gps-help').classList.remove('show');
-      document.getElementById('manual-input').style.display = 'none';
-      showToast('Lihat teknologi yang digunakan dalam aplikasi ini', 'info');
-    }
-
-    function hideTechInfo() {
-      document.getElementById('tech-info').style.display = 'none';
-    }
-
-    function showManualInput() {
-      document.getElementById('manual-input').style.display = 'block';
-      document.getElementById('gps-help').classList.remove('show');
-      document.getElementById('tech-info').style.display = 'none';
-      showToast('Masukkan koordinat latitude dan longitude secara manual', 'info');
-    }
-
-    function hideManualInput() {
-      document.getElementById('manual-input').style.display = 'none';
-      document.getElementById('manual-lat').value = '';
-      document.getElementById('manual-lng').value = '';
-    }
-
-    function saveManualCoordinates() {
-      const lat = parseFloat(document.getElementById('manual-lat').value);
-      const lng = parseFloat(document.getElementById('manual-lng').value);
-
-      if (isNaN(lat) || isNaN(lng)) {
-        showToast('Masukkan koordinat yang valid! Contoh: Latitude: -6.200000, Longitude: 106.816666', 'error');
-        return;
-      }
-
-      if (lat < -90 || lat > 90) {
-        showToast('Latitude harus antara -90 sampai 90', 'error');
-        return;
-      }
-
-      if (lng < -180 || lng > 180) {
-        showToast('Longitude harus antara -180 sampai 180', 'error');
-        return;
-      }
-
-      // Buat objek posisi manual
-      currentPosition = {
-        coords: {
-          latitude: lat,
-          longitude: lng,
-          accuracy: 0 // Manual input, akurasi tidak diketahui
+            elements.historyList.innerHTML = sortedHistory.map(location => `
+                <div class="history-item">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-gray-800 mb-1">
+                                📍 ${new Date(location.timestamp).toLocaleString('id-ID')}
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                <div>Lat: <span class="font-mono">${location.latitude.toFixed(6)}</span></div>
+                                <div>Lng: <span class="font-mono">${location.longitude.toFixed(6)}</span></div>
+                                <div>Akurasi: ±${Math.round(location.accuracy)} meter</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 ml-4">
+                            <a href="https://www.google.com/maps?q=${location.latitude},${location.longitude}" 
+                               target="_blank" rel="noopener noreferrer"
+                               class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors">
+                                🗺️ Maps
+                            </a>
+                            <button onclick="deleteLocation('${location.__backendId}')" 
+                                    class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition-colors">
+                                🗑️ Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
-      };
 
-      updateCurrentLocation(currentPosition);
-      updateStatus('✅ Koordinat Manual Aktif', 'active');
-      document.getElementById('record-btn').disabled = false;
-      hideRetryButton();
-      hideManualInput();
-      
-      showToast('Koordinat berhasil disimpan! Sekarang Anda bisa merekam lokasi.', 'success');
-    }
+        // Delete location
+        async function deleteLocation(backendId) {
+            const locationToDelete = locationHistory.find(loc => loc.__backendId === backendId);
+            if (!locationToDelete || !window.dataSdk) return;
 
-    async function recordLocation() {
-      if (!currentPosition || isRecording) return;
+            const result = await window.dataSdk.delete(locationToDelete);
+            if (result.isOk) {
+                showSuccess('Lokasi berhasil dihapus!');
+            } else {
+                showError('Gagal menghapus lokasi. Silakan coba lagi.');
+            }
+        }
 
-      if (allRecords.length >= 999) {
-        showToast('Batas maksimum 999 rekaman tercapai. Hapus beberapa rekaman terlebih dahulu.', 'error');
-        return;
-      }
+        // Update location count
+        function updateLocationCount() {
+            const count = locationHistory.length;
+            elements.locationCount.textContent = `${count} lokasi tersimpan`;
+        }
 
-      isRecording = true;
-      const recordBtn = document.getElementById('record-btn');
-      const originalText = recordBtn.innerHTML;
-      recordBtn.innerHTML = '<span>Merekam...</span><span class="loading"></span>';
-      recordBtn.disabled = true;
+        // Show success message
+        function showSuccess(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
 
-      const record = {
-        id: Date.now().toString(),
-        latitude: currentPosition.coords.latitude,
-        longitude: currentPosition.coords.longitude,
-        accuracy: currentPosition.coords.accuracy,
-        timestamp: new Date().toISOString(),
-        label: `Lokasi ${allRecords.length + 1}`
-      };
+        // Show error message
+        function showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
 
-      const result = await window.dataSdk.create(record);
+        // Element SDK Configuration
+        async function onConfigChange(config) {
+            document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
+            document.getElementById('tracking-button-text').textContent = config.tracking_button_text || defaultConfig.tracking_button_text;
+            document.getElementById('save-button-text').textContent = config.save_button_text || defaultConfig.save_button_text;
+        }
 
-      if (result.isOk) {
-        showToast('Lokasi berhasil direkam!', 'success');
-      } else {
-        showToast('Gagal merekam lokasi', 'error');
-      }
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            };
+        }
 
-      recordBtn.innerHTML = originalText;
-      recordBtn.disabled = false;
-      isRecording = false;
-    }
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ['app_title', config.app_title || defaultConfig.app_title],
+                ['tracking_button_text', config.tracking_button_text || defaultConfig.tracking_button_text],
+                ['save_button_text', config.save_button_text || defaultConfig.save_button_text]
+            ]);
+        }
 
-    function renderRecords(records) {
-      const listEl = document.getElementById('records-list');
-      
-      if (records.length === 0) {
-        listEl.innerHTML = `
-          <div class="empty-state">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            <p>Belum ada lokasi yang direkam</p>
-          </div>
-        `;
-        return;
-      }
+        // Initialize Element SDK
+        async function initializeElementSDK() {
+            if (window.elementSdk) {
+                await window.elementSdk.init({
+                    defaultConfig,
+                    onConfigChange,
+                    mapToCapabilities,
+                    mapToEditPanelValues
+                });
+            }
+        }
 
-      const sortedRecords = [...records].sort((a, b) => 
-        new Date(b.timestamp) - new Date(a.timestamp)
-      );
+        // Event listeners
+        elements.getLocationBtn.addEventListener('click', getCurrentLocation);
+        elements.saveLocationBtn.addEventListener('click', saveLocation);
 
-      listEl.innerHTML = sortedRecords.map(record => {
-        const date = new Date(record.timestamp);
-        const formattedDate = date.toLocaleDateString('id-ID', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializeDataSDK();
+            await initializeElementSDK();
         });
 
-        return `
-          <div class="record-item" data-id="${record.id}">
-            <div class="record-header">
-              <span class="record-time">${formattedDate}</span>
-              <button class="delete-btn" onclick="deleteRecord('${record.id}')">Hapus</button>
-            </div>
-            <div class="record-coords">Lat: ${record.latitude.toFixed(6)}</div>
-            <div class="record-coords">Lng: ${record.longitude.toFixed(6)}</div>
-            <div class="record-coords">Akurasi: ±${record.accuracy.toFixed(1)}m</div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function updateRecordCount(count) {
-      document.getElementById('record-count').textContent = count;
-    }
-
-    async function deleteRecord(id) {
-      const record = allRecords.find(r => r.id === id);
-      if (!record) return;
-
-      const result = await window.dataSdk.delete(record);
-
-      if (result.isOk) {
-        showToast('Rekaman dihapus', 'success');
-      } else {
-        showToast('Gagal menghapus rekaman', 'error');
-      }
-    }
-
-    function exportData() {
-      if (allRecords.length === 0) {
-        showToast('Tidak ada data untuk diekspor', 'error');
-        return;
-      }
-
-      const csvContent = [
-        ['No', 'Tanggal', 'Waktu', 'Latitude', 'Longitude', 'Akurasi (m)'].join(','),
-        ...allRecords.map((record, index) => {
-          const date = new Date(record.timestamp);
-          return [
-            index + 1,
-            date.toLocaleDateString('id-ID'),
-            date.toLocaleTimeString('id-ID'),
-            record.latitude,
-            record.longitude,
-            record.accuracy.toFixed(1)
-          ].join(',');
-        })
-      ].join('\n');
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      
-      link.setAttribute('href', url);
-      link.setAttribute('download', `gps-tracker-${Date.now()}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      showToast('Data berhasil diekspor!', 'success');
-    }
-
-    function showToast(message, type = 'success') {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      
-      if (type === 'success') {
-        toast.style.background = '#28a745';
-      } else if (type === 'error') {
-        toast.style.background = '#dc3545';
-      } else if (type === 'info') {
-        toast.style.background = '#17a2b8';
-      }
-      
-      toast.classList.add('show');
-      
-      const timeout = type === 'error' ? 6000 : 3000;
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, timeout);
-    }
-
-    window.deleteRecord = deleteRecord;
-
-    // Mulai aplikasi
-    initApp();
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a71c0234333d1',t:'MTc2MjE1Nzk0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+        // Make deleteLocation available globally
+        window.deleteLocation = deleteLocation;
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a7dacd193fd93',t:'MTc2MjE1ODQzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
