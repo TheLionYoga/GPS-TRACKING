@@ -73,7 +73,7 @@
       color: #1e293b;
     }
     
-    .camera-section, .location-section {
+    .camera-section, .location-section, .gallery-section {
       background: white;
       border-radius: 16px;
       padding: 24px;
@@ -204,6 +204,90 @@
       display: none;
     }
     
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    
+    .photo-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease;
+    }
+    
+    .photo-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .photo-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    
+    .photo-info {
+      padding: 12px;
+    }
+    
+    .photo-time {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+    
+    .photo-coords {
+      font-size: 12px;
+      color: #475569;
+      background: white;
+      padding: 8px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .photo-coords div {
+      margin: 2px 0;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #94a3b8;
+    }
+    
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    
+    .delete-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 8px;
+      width: 100%;
+      transition: background 0.2s ease;
+    }
+    
+    .delete-btn:hover {
+      background: #dc2626;
+    }
+    
+    .delete-btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+    
     .toast {
       position: fixed;
       bottom: 20px;
@@ -317,6 +401,7 @@
     let currentStream = null;
     let isUsingFrontCamera = false;
     let locationWatchId = null;
+    let photos = [];
     
     async function onConfigChange(config) {
       const appTitle = config.app_title || defaultConfig.app_title;
@@ -470,6 +555,7 @@
         startBtn.disabled = false;
         stopBtn.disabled = false;
         switchBtn.disabled = false;
+        document.getElementById('captureBtn').disabled = false;
         
         showToast('📹 Kamera aktif');
         
@@ -511,6 +597,7 @@
       startBtn.disabled = false;
       stopBtn.disabled = true;
       switchBtn.disabled = true;
+      document.getElementById('captureBtn').disabled = true;
       
       showToast('⏹️ Kamera dihentikan');
     }
@@ -524,10 +611,114 @@
       }
     }
     
+    async function capturePhoto() {
+      if (!currentStream || !currentLocation) {
+        showToast('Pastikan kamera aktif dan lokasi terdeteksi');
+        return;
+      }
+      
+      if (photos.length >= 50) {
+        showToast('Maksimal 50 foto. Hapus beberapa foto terlebih dahulu.');
+        return;
+      }
+      
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const captureBtn = document.getElementById('captureBtn');
+      
+      captureBtn.disabled = true;
+      captureBtn.textContent = '📸 Mengambil...';
+      
+      try {
+        // Set ukuran canvas sesuai video
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Konversi ke base64
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+        
+        const photoData = {
+          id: Date.now().toString(),
+          imageData: imageData,
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
+          timestamp: new Date().toISOString()
+        };
+        
+        photos.push(photoData);
+        renderGallery();
+        
+        showToast('📸 Foto berhasil diambil!');
+        
+      } catch (error) {
+        console.error('Error capturing photo:', error);
+        showToast('❌ Gagal mengambil foto');
+      } finally {
+        captureBtn.disabled = false;
+        captureBtn.textContent = '📸 Ambil Foto';
+      }
+    }
+    
+    function deletePhoto(photoId) {
+      photos = photos.filter(photo => photo.id !== photoId);
+      renderGallery();
+      showToast('Foto dihapus');
+    }
+    
+    function renderGallery() {
+      const grid = document.getElementById('photoGrid');
+      
+      if (photos.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <p>Belum ada foto yang diambil</p>
+          </div>
+        `;
+        return;
+      }
+      
+      const sortedPhotos = [...photos].sort((a, b) => 
+        new Date(b.timestamp) - new Date(a.timestamp)
+      );
+      
+      grid.innerHTML = sortedPhotos.map(photo => {
+        const date = new Date(photo.timestamp);
+        const formattedDate = date.toLocaleString('id-ID', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        return `
+          <div class="photo-card">
+            <img src="${photo.imageData}" alt="Foto lokasi">
+            <div class="photo-info">
+              <div class="photo-time">📅 ${formattedDate}</div>
+              <div class="photo-coords">
+                <div>📍 Lat: ${photo.latitude.toFixed(6)}</div>
+                <div>📍 Lng: ${photo.longitude.toFixed(6)}</div>
+              </div>
+              <button class="delete-btn" onclick="deletePhoto('${photo.id}')">Hapus</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
     // Event listeners untuk kontrol kamera
     document.getElementById('startBtn').addEventListener('click', startCamera);
     document.getElementById('stopBtn').addEventListener('click', stopCamera);
     document.getElementById('switchBtn').addEventListener('click', switchCamera);
+    document.getElementById('captureBtn').addEventListener('click', capturePhoto);
     
     async function init() {
       if (window.elementSdk) {
@@ -600,5 +791,5 @@
     
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998afe79e2c1fe09',t:'MTc2MjE2MzcwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998b082786f4fe09',t:'MTc2MjE2NDEwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
