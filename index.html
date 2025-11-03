@@ -159,10 +159,21 @@
         // Initialize Data SDK
         async function initializeDataSDK() {
             if (window.dataSdk) {
-                const result = await window.dataSdk.init(dataHandler);
-                if (!result.isOk) {
-                    console.error('Failed to initialize Data SDK');
+                try {
+                    const result = await window.dataSdk.init(dataHandler);
+                    if (!result.isOk) {
+                        console.error('Failed to initialize Data SDK:', result.error);
+                        showError('Gagal menginisialisasi sistem penyimpanan');
+                    } else {
+                        console.log('Data SDK initialized successfully');
+                    }
+                } catch (error) {
+                    console.error('Data SDK initialization error:', error);
+                    showError('Error saat menginisialisasi sistem penyimpanan');
                 }
+            } else {
+                console.error('Data SDK not available');
+                showError('Sistem penyimpanan tidak tersedia');
             }
         }
 
@@ -241,7 +252,21 @@
 
         // Save location to Data SDK
         async function saveLocation() {
-            if (!currentLocation || !window.dataSdk) return;
+            if (!currentLocation) {
+                showError('Tidak ada lokasi untuk disimpan. Dapatkan lokasi terlebih dahulu.');
+                return;
+            }
+
+            if (!window.dataSdk) {
+                showError('Sistem penyimpanan tidak tersedia.');
+                return;
+            }
+
+            // Check if we're at the limit
+            if (locationHistory.length >= 999) {
+                showError('Batas maksimum 999 lokasi tercapai. Hapus beberapa lokasi terlebih dahulu.');
+                return;
+            }
 
             elements.saveLocationBtn.disabled = true;
             elements.saveLocationBtn.innerHTML = '⏳ Menyimpan...';
@@ -255,12 +280,21 @@
                 address: `${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}`
             };
 
-            const result = await window.dataSdk.create(locationData);
-            
-            if (result.isOk) {
-                showSuccess('Lokasi berhasil disimpan!');
-            } else {
-                showError('Gagal menyimpan lokasi. Silakan coba lagi.');
+            try {
+                const result = await window.dataSdk.create(locationData);
+                
+                if (result.isOk) {
+                    showSuccess('Lokasi berhasil disimpan!');
+                    // Reset current location after saving
+                    currentLocation = null;
+                    elements.saveLocationBtn.disabled = true;
+                } else {
+                    console.error('Data SDK error:', result.error);
+                    showError(`Gagal menyimpan lokasi: ${result.error?.message || 'Error tidak diketahui'}`);
+                }
+            } catch (error) {
+                console.error('Save location error:', error);
+                showError('Terjadi kesalahan saat menyimpan lokasi. Silakan coba lagi.');
             }
 
             elements.saveLocationBtn.disabled = false;
@@ -390,12 +424,18 @@
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('App initializing...');
+            console.log('Data SDK available:', !!window.dataSdk);
+            console.log('Element SDK available:', !!window.elementSdk);
+            
             await initializeDataSDK();
             await initializeElementSDK();
+            
+            console.log('App initialization complete');
         });
 
         // Make deleteLocation available globally
         window.deleteLocation = deleteLocation;
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a7dacd193fd93',t:'MTc2MjE1ODQzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a868cc204fd93',t:'MTc2MjE1ODc5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
