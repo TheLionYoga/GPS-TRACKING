@@ -327,10 +327,11 @@
    <div id="gps-help" class="gps-help">
     <h3>📍 Cara Mengaktifkan GPS:</h3>
     <ol>
-     <li><strong>Izinkan Lokasi:</strong> Klik "Izinkan" saat browser meminta akses lokasi</li>
+     <li><strong>Izinkan Lokasi:</strong> Klik "Izinkan" atau "Allow" saat browser meminta akses lokasi</li>
      <li><strong>Aktifkan GPS:</strong> Pastikan GPS/Lokasi aktif di pengaturan perangkat</li>
      <li><strong>Keluar Ruangan:</strong> GPS bekerja lebih baik di area terbuka</li>
      <li><strong>Tunggu Sebentar:</strong> Proses pencarian sinyal membutuhkan waktu 10-30 detik</li>
+     <li><strong>Jika Masih Gagal:</strong> Gunakan tombol "Input Manual" di bawah untuk memasukkan koordinat secara manual</li>
     </ol>
    </div>
    <div class="current-location">
@@ -341,7 +342,15 @@
     <div class="location-item"><span class="location-label">Akurasi:</span> <span class="location-value" id="current-accuracy">-</span>
     </div>
    </div>
-   <div class="button-group"><button id="record-btn" class="btn-primary" disabled> <span id="record-btn-text">Rekam Lokasi</span> </button> <button id="retry-gps-btn" class="btn-warning" style="display: none;"> 🔄 Coba Lagi GPS </button> <button id="help-btn" class="btn-secondary"> ❓ Bantuan GPS </button> <button id="export-btn" class="btn-secondary"> <span id="export-btn-text">Ekspor Data</span> </button>
+   <div class="button-group"><button id="record-btn" class="btn-primary" disabled> <span id="record-btn-text">Rekam Lokasi</span> </button> <button id="retry-gps-btn" class="btn-warning" style="display: none;"> 🔄 Coba Lagi GPS </button> <button id="manual-btn" class="btn-warning" style="display: none;"> 📝 Input Manual </button> <button id="help-btn" class="btn-secondary"> ❓ Bantuan GPS </button> <button id="export-btn" class="btn-secondary"> <span id="export-btn-text">Ekspor Data</span> </button>
+   </div>
+   <div id="manual-input" class="gps-help" style="display: none;">
+    <h3>📝 Input Koordinat Manual:</h3>
+    <div style="margin: 15px 0;"><label for="manual-lat" style="display: block; margin-bottom: 5px; font-weight: 600;">Latitude:</label> <input type="number" id="manual-lat" step="any" placeholder="-6.200000" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;"> <label for="manual-lng" style="display: block; margin-bottom: 5px; font-weight: 600;">Longitude:</label> <input type="number" id="manual-lng" step="any" placeholder="106.816666" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 15px;">
+     <div style="display: flex; gap: 10px;"><button id="save-manual-btn" class="btn-primary" style="flex: 1;">💾 Simpan Koordinat</button> <button id="cancel-manual-btn" class="btn-secondary" style="flex: 1;">❌ Batal</button>
+     </div>
+    </div>
+    <p style="font-size: 12px; color: #666; margin: 10px 0 0 0;"><strong>Tips:</strong> Anda bisa mendapatkan koordinat dari Google Maps dengan klik kanan pada lokasi dan pilih koordinat yang muncul.</p>
    </div>
    <div class="records-section">
     <div class="records-header">
@@ -495,38 +504,66 @@
 
       updateStatus('🔍 Meminta izin akses lokasi...', 'waiting');
       
-      // Tampilkan bantuan GPS
+      // Tampilkan bantuan GPS otomatis
+      document.getElementById('gps-help').classList.add('show');
+      
       if (gpsRetryCount === 1) {
-        showToast('Klik "Izinkan" saat browser meminta akses lokasi!', 'info');
+        showToast('PENTING: Klik "Izinkan" atau "Allow" saat browser meminta akses lokasi!', 'info');
       }
 
-      // Coba dapatkan posisi dengan pengaturan yang lebih permisif
+      // Coba dengan pengaturan paling permisif dulu
+      const options = {
+        enableHighAccuracy: false,
+        maximumAge: 600000, // 10 menit
+        timeout: 30000 // 30 detik
+      };
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          // Berhasil mendapat izin dan posisi
+          // Berhasil mendapat posisi
           currentPosition = position;
           updateCurrentLocation(position);
           updateStatus('✅ GPS Aktif dan Siap!', 'active');
           document.getElementById('record-btn').disabled = false;
           hideRetryButton();
+          document.getElementById('gps-help').classList.remove('show');
           
-          if (position.coords.accuracy > 100) {
-            showToast(`GPS aktif tapi akurasi rendah (±${position.coords.accuracy.toFixed(0)}m). Coba pindah ke luar ruangan untuk akurasi lebih baik.`, 'info');
-          } else {
-            showToast('GPS berhasil aktif dengan akurasi baik!', 'success');
-          }
+          showToast('🎉 GPS berhasil aktif! Sekarang Anda bisa merekam lokasi.', 'success');
           
-          // Mulai tracking kontinyu
+          // Mulai tracking kontinyu dengan pengaturan lebih baik
           startContinuousTracking();
         },
         (error) => {
-          handleGPSError(error);
+          console.log('GPS Error:', error.code, error.message);
+          
+          // Jika gagal, coba lagi dengan pengaturan berbeda
+          if (gpsRetryCount === 1) {
+            // Coba kedua dengan high accuracy
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                currentPosition = position;
+                updateCurrentLocation(position);
+                updateStatus('✅ GPS Aktif (High Accuracy)', 'active');
+                document.getElementById('record-btn').disabled = false;
+                hideRetryButton();
+                document.getElementById('gps-help').classList.remove('show');
+                showToast('GPS aktif dengan akurasi tinggi!', 'success');
+                startContinuousTracking();
+              },
+              (error2) => {
+                handleGPSError(error2);
+              },
+              {
+                enableHighAccuracy: true,
+                maximumAge: 0,
+                timeout: 15000
+              }
+            );
+          } else {
+            handleGPSError(error);
+          }
         },
-        {
-          enableHighAccuracy: false, // Mulai dengan akurasi rendah untuk kompatibilitas
-          maximumAge: 300000, // Boleh pakai data lama 5 menit
-          timeout: 20000 // Timeout 20 detik
-        }
+        options
       );
     }
 
@@ -605,14 +642,19 @@
       document.getElementById('export-btn').addEventListener('click', exportData);
       document.getElementById('retry-gps-btn').addEventListener('click', retryGPS);
       document.getElementById('help-btn').addEventListener('click', toggleHelp);
+      document.getElementById('manual-btn').addEventListener('click', showManualInput);
+      document.getElementById('save-manual-btn').addEventListener('click', saveManualCoordinates);
+      document.getElementById('cancel-manual-btn').addEventListener('click', hideManualInput);
     }
 
     function showRetryButton() {
       document.getElementById('retry-gps-btn').style.display = 'block';
+      document.getElementById('manual-btn').style.display = 'block';
     }
 
     function hideRetryButton() {
       document.getElementById('retry-gps-btn').style.display = 'none';
+      document.getElementById('manual-btn').style.display = 'none';
     }
 
     function retryGPS() {
@@ -638,6 +680,55 @@
         helpEl.classList.add('show');
         showToast('Ikuti panduan di atas untuk mengaktifkan GPS', 'info');
       }
+    }
+
+    function showManualInput() {
+      document.getElementById('manual-input').style.display = 'block';
+      document.getElementById('gps-help').classList.remove('show');
+      showToast('Masukkan koordinat latitude dan longitude secara manual', 'info');
+    }
+
+    function hideManualInput() {
+      document.getElementById('manual-input').style.display = 'none';
+      document.getElementById('manual-lat').value = '';
+      document.getElementById('manual-lng').value = '';
+    }
+
+    function saveManualCoordinates() {
+      const lat = parseFloat(document.getElementById('manual-lat').value);
+      const lng = parseFloat(document.getElementById('manual-lng').value);
+
+      if (isNaN(lat) || isNaN(lng)) {
+        showToast('Masukkan koordinat yang valid! Contoh: Latitude: -6.200000, Longitude: 106.816666', 'error');
+        return;
+      }
+
+      if (lat < -90 || lat > 90) {
+        showToast('Latitude harus antara -90 sampai 90', 'error');
+        return;
+      }
+
+      if (lng < -180 || lng > 180) {
+        showToast('Longitude harus antara -180 sampai 180', 'error');
+        return;
+      }
+
+      // Buat objek posisi manual
+      currentPosition = {
+        coords: {
+          latitude: lat,
+          longitude: lng,
+          accuracy: 0 // Manual input, akurasi tidak diketahui
+        }
+      };
+
+      updateCurrentLocation(currentPosition);
+      updateStatus('✅ Koordinat Manual Aktif', 'active');
+      document.getElementById('record-btn').disabled = false;
+      hideRetryButton();
+      hideManualInput();
+      
+      showToast('Koordinat berhasil disimpan! Sekarang Anda bisa merekam lokasi.', 'success');
     }
 
     async function recordLocation() {
@@ -797,5 +888,5 @@
     // Mulai aplikasi
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a603600e49c5f',t:'MTc2MjE1NzIyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a6653072f9c5f',t:'MTc2MjE1NzQ3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
