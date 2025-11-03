@@ -3,439 +3,602 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GPS Coordinate Tracker</title>
-  <script src="/_sdk/data_sdk.js"></script>
+  <title>Pencatat Lokasi Foto</title>
   <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-        body {
-            box-sizing: border-box;
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        html {
-            height: 100%;
-        }
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .location-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 16px;
-            padding: 24px;
-            color: white;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        .coordinate-display {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 16px;
-            margin: 8px 0;
-        }
-        .history-item {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            margin: 8px 0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border-left: 4px solid #667eea;
-        }
-    </style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100%;
+      height: 100%;
+    }
+    
+    html {
+      height: 100%;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header h1 {
+      margin: 0 0 16px 0;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a202c;
+    }
+    
+    .map-container {
+      width: 100%;
+      height: 200px;
+      background: #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 16px;
+    }
+    
+    #map {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-size: 14px;
+    }
+    
+    .location-info {
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #475569;
+    }
+    
+    .location-info strong {
+      color: #1e293b;
+    }
+    
+    .camera-section, .location-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .camera-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      transition: opacity 0.3s ease;
+    }
+    
+    .camera-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .camera-controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .control-btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+    
+    .control-btn:hover:not(:disabled) {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    .control-btn:active {
+      transform: translateY(0);
+    }
+    
+    .control-btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .location-details {
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 12px;
+    }
+    
+    .location-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .location-row:last-child {
+      border-bottom: none;
+    }
+    
+    .location-label {
+      font-weight: 600;
+      color: #475569;
+    }
+    
+    .location-value {
+      font-family: 'Courier New', monospace;
+      color: #1e293b;
+      font-weight: 500;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    canvas {
+      display: none;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1e293b;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .container {
+        padding: 12px;
+      }
+      
+      .header, .camera-section, .location-section {
+        padding: 16px;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .video-container {
+        height: 300px;
+      }
+      
+      .camera-controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .control-btn {
+        width: 100%;
+        max-width: 200px;
+      }
+    }
+  </style>
   <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
- <body class="min-h-full bg-gradient-to-br from-blue-50 to-indigo-100">
-  <main class="container mx-auto px-4 py-6 max-w-4xl"><!-- Header -->
-   <header class="text-center mb-8">
-    <h1 id="app-title" class="text-4xl font-bold text-gray-800 mb-2">GPS Coordinate Tracker</h1>
-    <p class="text-gray-600">Dapatkan koordinat GPS Anda dengan akurat</p>
-   </header><!-- Current Location Card -->
-   <div class="location-card mb-8">
-    <div class="flex items-center justify-between mb-4">
-     <h2 class="text-2xl font-semibold">📍 Lokasi Saat Ini</h2>
-     <div id="status-indicator" class="w-3 h-3 bg-gray-400 rounded-full"></div>
-    </div>
-    <div id="location-display" class="space-y-4">
-     <div class="coordinate-display">
-      <div class="text-sm opacity-80 mb-1">
-       Latitude
-      </div>
-      <div id="latitude-display" class="text-2xl font-mono">
-       -
-      </div>
-     </div>
-     <div class="coordinate-display">
-      <div class="text-sm opacity-80 mb-1">
-       Longitude
-      </div>
-      <div id="longitude-display" class="text-2xl font-mono">
-       -
-      </div>
-     </div>
-     <div class="coordinate-display">
-      <div class="text-sm opacity-80 mb-1">
-       Akurasi
-      </div>
-      <div id="accuracy-display" class="text-lg">
-       -
-      </div>
-     </div>
-     <div class="coordinate-display">
-      <div class="text-sm opacity-80 mb-1">
-       Waktu
-      </div>
-      <div id="timestamp-display" class="text-lg">
-       -
-      </div>
+ <body>
+  <div class="container">
+   <div class="header">
+    <h1 id="appTitle">Pencatat Lokasi Foto</h1>
+    <div class="map-container">
+     <div id="map">
+      📍 Menunggu lokasi...
      </div>
     </div>
-    <div class="flex gap-4 mt-6"><button id="get-location-btn" class="flex-1 bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"> 🎯 <span id="tracking-button-text">Dapatkan Lokasi Saya</span> </button> <button id="save-location-btn" class="flex-1 bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled> 💾 <span id="save-button-text">Simpan Lokasi</span> </button>
-    </div>
-    <div id="maps-link" class="mt-4 hidden"><a id="google-maps-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"> 🗺️ Buka di Google Maps </a>
-    </div>
-   </div><!-- Location History -->
-   <div class="bg-white rounded-2xl p-6 shadow-lg">
-    <div class="flex items-center justify-between mb-6">
-     <h2 class="text-2xl font-bold text-gray-800">📋 Riwayat Lokasi</h2>
-     <div id="location-count" class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-semibold">
-      0 lokasi tersimpan
-     </div>
-    </div>
-    <div id="history-list" class="space-y-4">
-     <div class="text-center text-gray-500 py-8">
-      Belum ada lokasi yang tersimpan. Klik "Dapatkan Lokasi Saya" untuk memulai!
-     </div>
-    </div>
-   </div><!-- Loading Overlay -->
-   <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-lg p-6 text-center">
-     <div class="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-     <p class="text-gray-700">Mendapatkan lokasi Anda...</p>
+    <div class="location-info" id="locationInfo"><strong>Lokasi Saat Ini:</strong> Memuat...
     </div>
    </div>
-  </main>
+   <div class="camera-section">
+    <h2 id="cameraTitle">Kamera Realtime</h2>
+    <div class="video-container">
+     <video id="video" autoplay playsinline></video>
+     <div class="camera-overlay" id="cameraOverlay">
+      <div class="camera-status" id="cameraStatus">
+       📷 Memuat kamera...
+      </div>
+     </div>
+    </div>
+    <div class="camera-controls"><button class="control-btn" id="startBtn">▶️ Mulai</button> <button class="control-btn" id="stopBtn" disabled>⏹️ Berhenti</button> <button class="control-btn" id="switchBtn" disabled>🔄 Ganti Kamera</button>
+    </div>
+   </div>
+   <div class="location-section">
+    <h2 id="locationTitle">Informasi Lokasi Realtime</h2>
+    <div class="location-details" id="locationDetails">
+     <div class="location-row"><span class="location-label">📍 Latitude:</span> <span class="location-value" id="latValue">-</span>
+     </div>
+     <div class="location-row"><span class="location-label">📍 Longitude:</span> <span class="location-value" id="lngValue">-</span>
+     </div>
+     <div class="location-row"><span class="location-label">🎯 Akurasi:</span> <span class="location-value" id="accuracyValue">-</span>
+     </div>
+     <div class="location-row"><span class="location-label">🕒 Update:</span> <span class="location-value" id="timeValue">-</span>
+     </div>
+    </div>
+   </div>
+  </div>
+  <canvas id="canvas"></canvas>
   <script>
-        // Configuration
-        const defaultConfig = {
-            app_title: "GPS Coordinate Tracker",
-            tracking_button_text: "Dapatkan Lokasi Saya",
-            save_button_text: "Simpan Lokasi"
-        };
-
-        // Global state
-        let currentLocation = null;
-        let locationHistory = [];
-        let isTracking = false;
-
-        // DOM elements
-        const elements = {
-            getLocationBtn: document.getElementById('get-location-btn'),
-            saveLocationBtn: document.getElementById('save-location-btn'),
-            latitudeDisplay: document.getElementById('latitude-display'),
-            longitudeDisplay: document.getElementById('longitude-display'),
-            accuracyDisplay: document.getElementById('accuracy-display'),
-            timestampDisplay: document.getElementById('timestamp-display'),
-            statusIndicator: document.getElementById('status-indicator'),
-            mapsLink: document.getElementById('maps-link'),
-            googleMapsLink: document.getElementById('google-maps-link'),
-            historyList: document.getElementById('history-list'),
-            locationCount: document.getElementById('location-count'),
-            loadingOverlay: document.getElementById('loading-overlay')
-        };
-
-        // Data SDK Handler
-        const dataHandler = {
-            onDataChanged(data) {
-                locationHistory = data;
-                updateHistoryDisplay();
-                updateLocationCount();
-            }
-        };
-
-        // Initialize Data SDK
-        async function initializeDataSDK() {
-            if (window.dataSdk) {
-                try {
-                    const result = await window.dataSdk.init(dataHandler);
-                    if (!result.isOk) {
-                        console.error('Failed to initialize Data SDK:', result.error);
-                        showError('Gagal menginisialisasi sistem penyimpanan');
-                    } else {
-                        console.log('Data SDK initialized successfully');
-                    }
-                } catch (error) {
-                    console.error('Data SDK initialization error:', error);
-                    showError('Error saat menginisialisasi sistem penyimpanan');
-                }
-            } else {
-                console.error('Data SDK not available');
-                showError('Sistem penyimpanan tidak tersedia');
-            }
+    const defaultConfig = {
+      app_title: "Kamera Lokasi Realtime",
+      camera_title: "Kamera Realtime",
+      location_title: "Informasi Lokasi Realtime",
+      primary_color: "#3b82f6",
+      background_gradient_start: "#667eea",
+      background_gradient_end: "#764ba2",
+      text_color: "#1a202c",
+      font_family: "Inter",
+      font_size: 16
+    };
+    
+    let currentLocation = null;
+    let currentStream = null;
+    let isUsingFrontCamera = false;
+    let locationWatchId = null;
+    
+    async function onConfigChange(config) {
+      const appTitle = config.app_title || defaultConfig.app_title;
+      const cameraTitle = config.camera_title || defaultConfig.camera_title;
+      const locationTitle = config.location_title || defaultConfig.location_title;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const bgStart = config.background_gradient_start || defaultConfig.background_gradient_start;
+      const bgEnd = config.background_gradient_end || defaultConfig.background_gradient_end;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const fontSize = config.font_size || defaultConfig.font_size;
+      
+      document.getElementById('appTitle').textContent = appTitle;
+      document.getElementById('cameraTitle').textContent = cameraTitle;
+      document.getElementById('locationTitle').textContent = locationTitle;
+      
+      document.body.style.background = `linear-gradient(135deg, ${bgStart} 0%, ${bgEnd} 100%)`;
+      document.body.style.fontFamily = `'${fontFamily}', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      
+      const controlBtns = document.querySelectorAll('.control-btn');
+      controlBtns.forEach(btn => {
+        btn.style.background = primaryColor;
+      });
+      
+      const headers = document.querySelectorAll('h1, h2');
+      headers.forEach(h => {
+        h.style.color = textColor;
+        if (h.tagName === 'H1') {
+          h.style.fontSize = `${fontSize * 1.75}px`;
+        } else {
+          h.style.fontSize = `${fontSize * 1.375}px`;
         }
-
-        // Get current location
-        function getCurrentLocation() {
-            if (!navigator.geolocation) {
-                showError('Geolocation tidak didukung oleh browser Anda');
-                return;
-            }
-
-            isTracking = true;
-            elements.loadingOverlay.classList.remove('hidden');
-            elements.getLocationBtn.disabled = true;
-            elements.statusIndicator.className = 'w-3 h-3 bg-yellow-400 rounded-full pulse';
-
-            const options = {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
+      });
+      
+      document.body.style.fontSize = `${fontSize}px`;
+    }
+    
+    function showToast(message) {
+      const existingToast = document.querySelector('.toast');
+      if (existingToast) {
+        existingToast.remove();
+      }
+      
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+    
+    function updateLocationDisplay() {
+      const locationInfo = document.getElementById('locationInfo');
+      const mapDiv = document.getElementById('map');
+      const latValue = document.getElementById('latValue');
+      const lngValue = document.getElementById('lngValue');
+      const accuracyValue = document.getElementById('accuracyValue');
+      const timeValue = document.getElementById('timeValue');
+      
+      if (currentLocation) {
+        locationInfo.innerHTML = `<strong>Lokasi Saat Ini:</strong> ${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}`;
+        mapDiv.innerHTML = `📍 Lat: ${currentLocation.latitude.toFixed(4)}, Lng: ${currentLocation.longitude.toFixed(4)}`;
+        
+        latValue.textContent = currentLocation.latitude.toFixed(8);
+        lngValue.textContent = currentLocation.longitude.toFixed(8);
+        accuracyValue.textContent = currentLocation.accuracy ? `±${currentLocation.accuracy.toFixed(0)}m` : 'N/A';
+        timeValue.textContent = new Date().toLocaleTimeString('id-ID');
+      } else {
+        locationInfo.innerHTML = '<strong>Lokasi Saat Ini:</strong> Tidak tersedia';
+        mapDiv.innerHTML = '📍 Lokasi tidak tersedia';
+        
+        latValue.textContent = '-';
+        lngValue.textContent = '-';
+        accuracyValue.textContent = '-';
+        timeValue.textContent = '-';
+      }
+    }
+    
+    function startLocationWatch() {
+      if ('geolocation' in navigator) {
+        locationWatchId = navigator.geolocation.watchPosition(
+          (position) => {
+            currentLocation = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: position.coords.accuracy
             };
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude, accuracy } = position.coords;
-                    const timestamp = new Date().toISOString();
-                    
-                    currentLocation = {
-                        latitude,
-                        longitude,
-                        accuracy,
-                        timestamp
-                    };
-
-                    displayCurrentLocation(currentLocation);
-                    elements.loadingOverlay.classList.add('hidden');
-                    elements.getLocationBtn.disabled = false;
-                    elements.saveLocationBtn.disabled = false;
-                    elements.statusIndicator.className = 'w-3 h-3 bg-green-400 rounded-full';
-                    isTracking = false;
-                },
-                (error) => {
-                    let errorMessage = 'Gagal mendapatkan lokasi';
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage = 'Akses lokasi ditolak. Silakan izinkan akses lokasi di browser Anda.';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage = 'Informasi lokasi tidak tersedia.';
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage = 'Waktu habis saat mencari lokasi.';
-                            break;
-                    }
-                    showError(errorMessage);
-                    elements.loadingOverlay.classList.add('hidden');
-                    elements.getLocationBtn.disabled = false;
-                    elements.statusIndicator.className = 'w-3 h-3 bg-red-400 rounded-full';
-                    isTracking = false;
-                },
-                options
-            );
-        }
-
-        // Display current location
-        function displayCurrentLocation(location) {
-            elements.latitudeDisplay.textContent = location.latitude.toFixed(6);
-            elements.longitudeDisplay.textContent = location.longitude.toFixed(6);
-            elements.accuracyDisplay.textContent = `±${Math.round(location.accuracy)} meter`;
-            elements.timestampDisplay.textContent = new Date(location.timestamp).toLocaleString('id-ID');
-
-            // Show Google Maps link
-            const mapsUrl = `https://www.google.com/maps?q=${location.latitude},${location.longitude}`;
-            elements.googleMapsLink.href = mapsUrl;
-            elements.mapsLink.classList.remove('hidden');
-        }
-
-        // Save location to Data SDK
-        async function saveLocation() {
-            if (!currentLocation) {
-                showError('Tidak ada lokasi untuk disimpan. Dapatkan lokasi terlebih dahulu.');
-                return;
-            }
-
-            if (!window.dataSdk) {
-                showError('Sistem penyimpanan tidak tersedia.');
-                return;
-            }
-
-            // Check if we're at the limit
-            if (locationHistory.length >= 999) {
-                showError('Batas maksimum 999 lokasi tercapai. Hapus beberapa lokasi terlebih dahulu.');
-                return;
-            }
-
-            elements.saveLocationBtn.disabled = true;
-            elements.saveLocationBtn.innerHTML = '⏳ Menyimpan...';
-
-            const locationData = {
-                id: Date.now().toString(),
-                latitude: currentLocation.latitude,
-                longitude: currentLocation.longitude,
-                accuracy: currentLocation.accuracy,
-                timestamp: currentLocation.timestamp,
-                address: `${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}`
-            };
-
-            try {
-                const result = await window.dataSdk.create(locationData);
-                
-                if (result.isOk) {
-                    showSuccess('Lokasi berhasil disimpan!');
-                    // Reset current location after saving
-                    currentLocation = null;
-                    elements.saveLocationBtn.disabled = true;
-                } else {
-                    console.error('Data SDK error:', result.error);
-                    showError(`Gagal menyimpan lokasi: ${result.error?.message || 'Error tidak diketahui'}`);
-                }
-            } catch (error) {
-                console.error('Save location error:', error);
-                showError('Terjadi kesalahan saat menyimpan lokasi. Silakan coba lagi.');
-            }
-
-            elements.saveLocationBtn.disabled = false;
-            elements.saveLocationBtn.innerHTML = `💾 <span id="save-button-text">${window.elementSdk?.config?.save_button_text || defaultConfig.save_button_text}</span>`;
-        }
-
-        // Update history display
-        function updateHistoryDisplay() {
-            if (locationHistory.length === 0) {
-                elements.historyList.innerHTML = `
-                    <div class="text-center text-gray-500 py-8">
-                        Belum ada lokasi yang tersimpan. Klik "Dapatkan Lokasi Saya" untuk memulai!
-                    </div>
-                `;
-                return;
-            }
-
-            const sortedHistory = [...locationHistory].sort((a, b) => 
-                new Date(b.timestamp) - new Date(a.timestamp)
-            );
-
-            elements.historyList.innerHTML = sortedHistory.map(location => `
-                <div class="history-item">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex-1">
-                            <div class="font-semibold text-gray-800 mb-1">
-                                📍 ${new Date(location.timestamp).toLocaleString('id-ID')}
-                            </div>
-                            <div class="text-sm text-gray-600 space-y-1">
-                                <div>Lat: <span class="font-mono">${location.latitude.toFixed(6)}</span></div>
-                                <div>Lng: <span class="font-mono">${location.longitude.toFixed(6)}</span></div>
-                                <div>Akurasi: ±${Math.round(location.accuracy)} meter</div>
-                            </div>
-                        </div>
-                        <div class="flex gap-2 ml-4">
-                            <a href="https://www.google.com/maps?q=${location.latitude},${location.longitude}" 
-                               target="_blank" rel="noopener noreferrer"
-                               class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors">
-                                🗺️ Maps
-                            </a>
-                            <button onclick="deleteLocation('${location.__backendId}')" 
-                                    class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition-colors">
-                                🗑️ Hapus
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Delete location
-        async function deleteLocation(backendId) {
-            const locationToDelete = locationHistory.find(loc => loc.__backendId === backendId);
-            if (!locationToDelete || !window.dataSdk) return;
-
-            const result = await window.dataSdk.delete(locationToDelete);
-            if (result.isOk) {
-                showSuccess('Lokasi berhasil dihapus!');
-            } else {
-                showError('Gagal menghapus lokasi. Silakan coba lagi.');
-            }
-        }
-
-        // Update location count
-        function updateLocationCount() {
-            const count = locationHistory.length;
-            elements.locationCount.textContent = `${count} lokasi tersimpan`;
-        }
-
-        // Show success message
-        function showSuccess(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        // Show error message
-        function showError(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 5000);
-        }
-
-        // Element SDK Configuration
-        async function onConfigChange(config) {
-            document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
-            document.getElementById('tracking-button-text').textContent = config.tracking_button_text || defaultConfig.tracking_button_text;
-            document.getElementById('save-button-text').textContent = config.save_button_text || defaultConfig.save_button_text;
-        }
-
-        function mapToCapabilities(config) {
-            return {
-                recolorables: [],
-                borderables: [],
-                fontEditable: undefined,
-                fontSizeable: undefined
-            };
-        }
-
-        function mapToEditPanelValues(config) {
-            return new Map([
-                ['app_title', config.app_title || defaultConfig.app_title],
-                ['tracking_button_text', config.tracking_button_text || defaultConfig.tracking_button_text],
-                ['save_button_text', config.save_button_text || defaultConfig.save_button_text]
-            ]);
-        }
-
-        // Initialize Element SDK
-        async function initializeElementSDK() {
-            if (window.elementSdk) {
-                await window.elementSdk.init({
-                    defaultConfig,
-                    onConfigChange,
-                    mapToCapabilities,
-                    mapToEditPanelValues
-                });
-            }
-        }
-
-        // Event listeners
-        elements.getLocationBtn.addEventListener('click', getCurrentLocation);
-        elements.saveLocationBtn.addEventListener('click', saveLocation);
-
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('App initializing...');
-            console.log('Data SDK available:', !!window.dataSdk);
-            console.log('Element SDK available:', !!window.elementSdk);
-            
-            await initializeDataSDK();
-            await initializeElementSDK();
-            
-            console.log('App initialization complete');
+            updateLocationDisplay();
+          },
+          (error) => {
+            console.error('Error getting location:', error);
+            showToast('Tidak dapat mengakses lokasi');
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 1000,
+            timeout: 10000
+          }
+        );
+      } else {
+        showToast('Geolocation tidak didukung');
+      }
+    }
+    
+    function stopLocationWatch() {
+      if (locationWatchId) {
+        navigator.geolocation.clearWatch(locationWatchId);
+        locationWatchId = null;
+      }
+    }
+    
+    async function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Kamera tidak didukung di perangkat ini');
+        return;
+      }
+      
+      const video = document.getElementById('video');
+      const overlay = document.getElementById('cameraOverlay');
+      const status = document.getElementById('cameraStatus');
+      const startBtn = document.getElementById('startBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      const switchBtn = document.getElementById('switchBtn');
+      
+      startBtn.disabled = true;
+      status.textContent = '📷 Mengakses kamera...';
+      
+      try {
+        const constraints = {
+          video: {
+            facingMode: isUsingFrontCamera ? 'user' : 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        };
+        
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = currentStream;
+        
+        await new Promise((resolve, reject) => {
+          video.onloadedmetadata = () => {
+            video.play().then(resolve).catch(reject);
+          };
+          video.onerror = reject;
+          setTimeout(() => reject(new Error('Timeout')), 10000);
         });
-
-        // Make deleteLocation available globally
-        window.deleteLocation = deleteLocation;
-    </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a868cc204fd93',t:'MTc2MjE1ODc5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+        
+        overlay.classList.add('hidden');
+        startBtn.disabled = false;
+        stopBtn.disabled = false;
+        switchBtn.disabled = false;
+        
+        showToast('📹 Kamera aktif');
+        
+      } catch (error) {
+        console.error('Error starting camera:', error);
+        
+        let errorMessage = 'Gagal mengakses kamera';
+        if (error.name === 'NotAllowedError') {
+          errorMessage = '🚫 Izin kamera ditolak';
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = '📷 Kamera tidak ditemukan';
+        } else if (error.name === 'NotReadableError') {
+          errorMessage = '🔧 Kamera sedang digunakan aplikasi lain';
+        }
+        
+        status.textContent = errorMessage;
+        startBtn.disabled = false;
+        showToast(errorMessage);
+      }
+    }
+    
+    function stopCamera() {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
+      }
+      
+      const video = document.getElementById('video');
+      const overlay = document.getElementById('cameraOverlay');
+      const status = document.getElementById('cameraStatus');
+      const startBtn = document.getElementById('startBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      const switchBtn = document.getElementById('switchBtn');
+      
+      video.srcObject = null;
+      overlay.classList.remove('hidden');
+      status.textContent = '📷 Kamera berhenti';
+      
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      switchBtn.disabled = true;
+      
+      showToast('⏹️ Kamera dihentikan');
+    }
+    
+    async function switchCamera() {
+      if (currentStream) {
+        stopCamera();
+        isUsingFrontCamera = !isUsingFrontCamera;
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await startCamera();
+      }
+    }
+    
+    // Event listeners untuk kontrol kamera
+    document.getElementById('startBtn').addEventListener('click', startCamera);
+    document.getElementById('stopBtn').addEventListener('click', stopCamera);
+    document.getElementById('switchBtn').addEventListener('click', switchCamera);
+    
+    async function init() {
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.primary_color || defaultConfig.primary_color,
+                set: (value) => {
+                  config.primary_color = value;
+                  window.elementSdk.setConfig({ primary_color: value });
+                }
+              },
+              {
+                get: () => config.background_gradient_start || defaultConfig.background_gradient_start,
+                set: (value) => {
+                  config.background_gradient_start = value;
+                  window.elementSdk.setConfig({ background_gradient_start: value });
+                }
+              },
+              {
+                get: () => config.background_gradient_end || defaultConfig.background_gradient_end,
+                set: (value) => {
+                  config.background_gradient_end = value;
+                  window.elementSdk.setConfig({ background_gradient_end: value });
+                }
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => {
+                  config.text_color = value;
+                  window.elementSdk.setConfig({ text_color: value });
+                }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => config.font_family || defaultConfig.font_family,
+              set: (value) => {
+                config.font_family = value;
+                window.elementSdk.setConfig({ font_family: value });
+              }
+            },
+            fontSizeable: {
+              get: () => config.font_size || defaultConfig.font_size,
+              set: (value) => {
+                config.font_size = value;
+                window.elementSdk.setConfig({ font_size: value });
+              }
+            }
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["app_title", config.app_title || defaultConfig.app_title],
+            ["camera_title", config.camera_title || defaultConfig.camera_title],
+            ["location_title", config.location_title || defaultConfig.location_title]
+          ])
+        });
+      }
+      
+      // Mulai tracking lokasi
+      startLocationWatch();
+      
+      // Auto-start kamera saat aplikasi dimuat
+      setTimeout(() => {
+        startCamera();
+      }, 1000);
+    }
+    
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998afe79e2c1fe09',t:'MTc2MjE2MzcwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
