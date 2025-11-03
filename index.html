@@ -331,6 +331,33 @@
       vertical-align: middle;
     }
     
+    .maps-btn {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .maps-btn:hover:not(:disabled) {
+      background: #3367d6;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+    }
+    
+    .maps-btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
@@ -402,6 +429,8 @@
      <div class="location-row"><span class="location-label">🎯 Akurasi:</span> <span class="location-value" id="accuracyValue">-</span>
      </div>
      <div class="location-row"><span class="location-label">🕒 Update:</span> <span class="location-value" id="timeValue">-</span>
+     </div>
+     <div class="location-row"><span class="location-label">🗺️ Maps:</span> <button id="openMapsBtn" class="maps-btn" onclick="openGoogleMaps()">Buka di Google Maps</button>
      </div>
     </div>
    </div>
@@ -507,6 +536,7 @@
       const lngValue = document.getElementById('lngValue');
       const accuracyValue = document.getElementById('accuracyValue');
       const timeValue = document.getElementById('timeValue');
+      const mapsBtn = document.getElementById('openMapsBtn');
       
       if (currentLocation) {
         locationInfo.innerHTML = `<strong>Lokasi Saat Ini:</strong> ${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}`;
@@ -516,6 +546,10 @@
         lngValue.textContent = currentLocation.longitude.toFixed(8);
         accuracyValue.textContent = currentLocation.accuracy ? `±${currentLocation.accuracy.toFixed(0)}m` : 'N/A';
         timeValue.textContent = new Date().toLocaleTimeString('id-ID');
+        
+        // Enable maps button
+        mapsBtn.disabled = false;
+        mapsBtn.textContent = 'Buka di Google Maps';
       } else {
         locationInfo.innerHTML = '<strong>Lokasi Saat Ini:</strong> Tidak tersedia';
         mapDiv.innerHTML = '📍 Lokasi tidak tersedia';
@@ -524,7 +558,26 @@
         lngValue.textContent = '-';
         accuracyValue.textContent = '-';
         timeValue.textContent = '-';
+        
+        // Disable maps button
+        mapsBtn.disabled = true;
+        mapsBtn.textContent = 'Lokasi tidak tersedia';
       }
+    }
+    
+    function openGoogleMaps() {
+      if (!currentLocation) {
+        showToast('Lokasi belum terdeteksi');
+        return;
+      }
+      
+      const lat = currentLocation.latitude;
+      const lng = currentLocation.longitude;
+      const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}&z=15`;
+      
+      // Open in new tab
+      window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+      showToast('🗺️ Membuka Google Maps...');
     }
     
     function startLocationWatch() {
@@ -937,5 +990,5 @@
     
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998ba1ba419efce4',t:'MTc2MjE3MDM5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998bc53f429cf8ec',t:'MTc2MjE3MTg0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
