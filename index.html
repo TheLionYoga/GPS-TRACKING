@@ -46,6 +46,7 @@
       border-radius: 10px;
       margin-bottom: 20px;
       font-weight: 600;
+      font-size: 16px;
     }
 
     .status.active {
@@ -61,6 +62,35 @@
     .status.waiting {
       background: #fff3cd;
       color: #856404;
+    }
+
+    .gps-help {
+      background: #e7f3ff;
+      border: 2px solid #0066cc;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .gps-help.show {
+      display: block;
+    }
+
+    .gps-help h3 {
+      margin: 0 0 10px 0;
+      color: #0066cc;
+      font-size: 16px;
+    }
+
+    .gps-help ol {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+
+    .gps-help li {
+      margin: 5px 0;
+      font-size: 14px;
     }
 
     .current-location {
@@ -91,10 +121,12 @@
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     button {
       flex: 1;
+      min-width: 120px;
       padding: 15px;
       border: none;
       border-radius: 10px;
@@ -130,6 +162,15 @@
       background: #5a6268;
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+    }
+
+    .btn-warning {
+      background: #ffc107;
+      color: #212529;
+    }
+
+    .btn-warning:hover {
+      background: #e0a800;
     }
 
     .records-section {
@@ -229,6 +270,8 @@
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
       display: none;
       z-index: 1000;
+      max-width: 90%;
+      text-align: center;
     }
 
     .toast.show {
@@ -261,6 +304,16 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
@@ -268,8 +321,17 @@
  <body>
   <div class="container">
    <h1 id="app-title">GPS Tracker Offline</h1>
-   <div id="status" class="status inactive">
-    GPS Tidak Aktif
+   <div id="status" class="status inactive pulse">
+    🔍 Memulai GPS...
+   </div>
+   <div id="gps-help" class="gps-help">
+    <h3>📍 Cara Mengaktifkan GPS:</h3>
+    <ol>
+     <li><strong>Izinkan Lokasi:</strong> Klik "Izinkan" saat browser meminta akses lokasi</li>
+     <li><strong>Aktifkan GPS:</strong> Pastikan GPS/Lokasi aktif di pengaturan perangkat</li>
+     <li><strong>Keluar Ruangan:</strong> GPS bekerja lebih baik di area terbuka</li>
+     <li><strong>Tunggu Sebentar:</strong> Proses pencarian sinyal membutuhkan waktu 10-30 detik</li>
+    </ol>
    </div>
    <div class="current-location">
     <div class="location-item"><span class="location-label">Latitude:</span> <span class="location-value" id="current-lat">-</span>
@@ -279,7 +341,7 @@
     <div class="location-item"><span class="location-label">Akurasi:</span> <span class="location-value" id="current-accuracy">-</span>
     </div>
    </div>
-   <div class="button-group"><button id="record-btn" class="btn-primary" disabled> <span id="record-btn-text">Rekam Lokasi</span> </button> <button id="export-btn" class="btn-secondary"> <span id="export-btn-text">Ekspor Data</span> </button>
+   <div class="button-group"><button id="record-btn" class="btn-primary" disabled> <span id="record-btn-text">Rekam Lokasi</span> </button> <button id="retry-gps-btn" class="btn-warning" style="display: none;"> 🔄 Coba Lagi GPS </button> <button id="help-btn" class="btn-secondary"> ❓ Bantuan GPS </button> <button id="export-btn" class="btn-secondary"> <span id="export-btn-text">Ekspor Data</span> </button>
    </div>
    <div class="records-section">
     <div class="records-header">
@@ -311,6 +373,7 @@
     let watchId = null;
     let allRecords = [];
     let isRecording = false;
+    let gpsRetryCount = 0;
 
     const dataHandler = {
       onDataChanged(data) {
@@ -416,49 +479,119 @@
         return;
       }
 
-      initGPS();
       setupEventListeners();
+      initGPS();
     }
 
     function initGPS() {
+      gpsRetryCount++;
+      
       if (!navigator.geolocation) {
-        updateStatus('GPS tidak didukung di browser ini', 'inactive');
+        updateStatus('❌ GPS tidak didukung di browser ini', 'inactive');
+        showToast('Browser tidak mendukung GPS. Gunakan Chrome, Safari, atau Firefox terbaru.', 'error');
+        showRetryButton();
         return;
       }
 
-      updateStatus('Menunggu sinyal GPS...', 'waiting');
+      updateStatus('🔍 Meminta izin akses lokasi...', 'waiting');
+      
+      // Tampilkan bantuan GPS
+      if (gpsRetryCount === 1) {
+        showToast('Klik "Izinkan" saat browser meminta akses lokasi!', 'info');
+      }
+
+      // Coba dapatkan posisi dengan pengaturan yang lebih permisif
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Berhasil mendapat izin dan posisi
+          currentPosition = position;
+          updateCurrentLocation(position);
+          updateStatus('✅ GPS Aktif dan Siap!', 'active');
+          document.getElementById('record-btn').disabled = false;
+          hideRetryButton();
+          
+          if (position.coords.accuracy > 100) {
+            showToast(`GPS aktif tapi akurasi rendah (±${position.coords.accuracy.toFixed(0)}m). Coba pindah ke luar ruangan untuk akurasi lebih baik.`, 'info');
+          } else {
+            showToast('GPS berhasil aktif dengan akurasi baik!', 'success');
+          }
+          
+          // Mulai tracking kontinyu
+          startContinuousTracking();
+        },
+        (error) => {
+          handleGPSError(error);
+        },
+        {
+          enableHighAccuracy: false, // Mulai dengan akurasi rendah untuk kompatibilitas
+          maximumAge: 300000, // Boleh pakai data lama 5 menit
+          timeout: 20000 // Timeout 20 detik
+        }
+      );
+    }
+
+    function startContinuousTracking() {
+      if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+      }
 
       watchId = navigator.geolocation.watchPosition(
         (position) => {
           currentPosition = position;
           updateCurrentLocation(position);
-          updateStatus('GPS Aktif', 'active');
-          document.getElementById('record-btn').disabled = false;
+          
+          // Update status jika akurasi berubah signifikan
+          if (position.coords.accuracy <= 50) {
+            updateStatus('✅ GPS Aktif - Akurasi Tinggi', 'active');
+          } else if (position.coords.accuracy <= 100) {
+            updateStatus('✅ GPS Aktif - Akurasi Sedang', 'active');
+          } else {
+            updateStatus('✅ GPS Aktif - Akurasi Rendah', 'active');
+          }
         },
         (error) => {
-          let message = 'GPS Tidak Aktif';
-          if (error.code === 1) {
-            message = 'Izin lokasi ditolak';
-          } else if (error.code === 2) {
-            message = 'Lokasi tidak tersedia';
-          } else if (error.code === 3) {
-            message = 'Timeout mendapatkan lokasi';
-          }
-          updateStatus(message, 'inactive');
-          document.getElementById('record-btn').disabled = true;
+          // Jangan langsung error pada tracking kontinyu
+          console.log('GPS tracking error:', error);
         },
         {
           enableHighAccuracy: true,
-          maximumAge: 0,
-          timeout: 10000
+          maximumAge: 60000,
+          timeout: 30000
         }
       );
+    }
+
+    function handleGPSError(error) {
+      let message = '❌ GPS Tidak Aktif';
+      let suggestion = '';
+      
+      if (error.code === 1) {
+        message = '❌ Izin lokasi ditolak';
+        suggestion = 'Klik ikon gembok/lokasi di address bar browser, pilih "Izinkan", lalu klik tombol "Coba Lagi GPS".';
+      } else if (error.code === 2) {
+        message = '📍 Lokasi tidak tersedia';
+        suggestion = 'Pastikan GPS aktif di pengaturan perangkat dan coba pindah ke luar ruangan. Sinyal GPS tidak bekerja baik di dalam gedung.';
+      } else if (error.code === 3) {
+        message = '⏱️ Timeout mendapatkan lokasi';
+        suggestion = 'Sinyal GPS lemah. Pindah ke area terbuka (luar ruangan) dan tunggu beberapa saat, lalu coba lagi.';
+      }
+      
+      updateStatus(message, 'inactive');
+      document.getElementById('record-btn').disabled = true;
+      showRetryButton();
+      showToast(suggestion, 'error');
     }
 
     function updateStatus(message, type) {
       const statusEl = document.getElementById('status');
       statusEl.textContent = message;
       statusEl.className = `status ${type}`;
+      
+      if (type === 'waiting') {
+        statusEl.classList.add('pulse');
+      } else {
+        statusEl.classList.remove('pulse');
+      }
     }
 
     function updateCurrentLocation(position) {
@@ -470,6 +603,41 @@
     function setupEventListeners() {
       document.getElementById('record-btn').addEventListener('click', recordLocation);
       document.getElementById('export-btn').addEventListener('click', exportData);
+      document.getElementById('retry-gps-btn').addEventListener('click', retryGPS);
+      document.getElementById('help-btn').addEventListener('click', toggleHelp);
+    }
+
+    function showRetryButton() {
+      document.getElementById('retry-gps-btn').style.display = 'block';
+    }
+
+    function hideRetryButton() {
+      document.getElementById('retry-gps-btn').style.display = 'none';
+    }
+
+    function retryGPS() {
+      hideRetryButton();
+      if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      currentPosition = null;
+      document.getElementById('current-lat').textContent = '-';
+      document.getElementById('current-lng').textContent = '-';
+      document.getElementById('current-accuracy').textContent = '-';
+      
+      showToast('Mencoba mengaktifkan GPS lagi...', 'info');
+      setTimeout(initGPS, 1000);
+    }
+
+    function toggleHelp() {
+      const helpEl = document.getElementById('gps-help');
+      if (helpEl.classList.contains('show')) {
+        helpEl.classList.remove('show');
+      } else {
+        helpEl.classList.add('show');
+        showToast('Ikuti panduan di atas untuk mengaktifkan GPS', 'info');
+      }
     }
 
     async function recordLocation() {
@@ -607,17 +775,27 @@
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
       toast.textContent = message;
-      toast.style.background = type === 'success' ? '#28a745' : '#dc3545';
+      
+      if (type === 'success') {
+        toast.style.background = '#28a745';
+      } else if (type === 'error') {
+        toast.style.background = '#dc3545';
+      } else if (type === 'info') {
+        toast.style.background = '#17a2b8';
+      }
+      
       toast.classList.add('show');
       
+      const timeout = type === 'error' ? 6000 : 3000;
       setTimeout(() => {
         toast.classList.remove('show');
-      }, 3000);
+      }, timeout);
     }
 
     window.deleteRecord = deleteRecord;
 
+    // Mulai aplikasi
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a532f7006a8e1',t:'MTc2MjE1NjY5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a603600e49c5f',t:'MTc2MjE1NzIyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
