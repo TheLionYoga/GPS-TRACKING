@@ -333,6 +333,26 @@
      <li><strong>Tunggu Sebentar:</strong> Proses pencarian sinyal membutuhkan waktu 10-30 detik</li>
      <li><strong>Jika Masih Gagal:</strong> Gunakan tombol "Input Manual" di bawah untuk memasukkan koordinat secara manual</li>
     </ol>
+    <div id="gps-diagnostics" style="background: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 15px; font-size: 12px;">
+     <h4 style="margin: 0 0 8px 0; color: #856404;">🔧 Diagnostik GPS:</h4>
+     <div id="diagnostic-info">
+      <div>
+       Browser: <span id="browser-info">-</span>
+      </div>
+      <div>
+       Platform: <span id="platform-info">-</span>
+      </div>
+      <div>
+       HTTPS: <span id="https-info">-</span>
+      </div>
+      <div>
+       Geolocation Support: <span id="geo-support">-</span>
+      </div>
+      <div>
+       Permission Status: <span id="permission-status">-</span>
+      </div>
+     </div>
+    </div>
    </div>
    <div class="current-location">
     <div class="location-item"><span class="location-label">Latitude:</span> <span class="location-value" id="current-lat">-</span>
@@ -539,7 +559,41 @@
       }
 
       setupEventListeners();
+      updateDiagnostics();
       initGPS();
+    }
+
+    function updateDiagnostics() {
+      // Update browser info
+      const userAgent = navigator.userAgent;
+      let browserName = 'Unknown';
+      if (userAgent.includes('Chrome')) browserName = 'Chrome';
+      else if (userAgent.includes('Firefox')) browserName = 'Firefox';
+      else if (userAgent.includes('Safari')) browserName = 'Safari';
+      else if (userAgent.includes('Edge')) browserName = 'Edge';
+      
+      document.getElementById('browser-info').textContent = browserName;
+      document.getElementById('platform-info').textContent = navigator.platform || 'Unknown';
+      document.getElementById('https-info').textContent = location.protocol === 'https:' ? '✅ Ya' : '❌ Tidak';
+      document.getElementById('geo-support').textContent = navigator.geolocation ? '✅ Didukung' : '❌ Tidak Didukung';
+      
+      // Check permission status
+      if (navigator.permissions) {
+        navigator.permissions.query({name: 'geolocation'}).then(function(result) {
+          let status = result.state;
+          if (status === 'granted') {
+            document.getElementById('permission-status').textContent = '✅ Diizinkan';
+          } else if (status === 'denied') {
+            document.getElementById('permission-status').textContent = '❌ Ditolak';
+          } else {
+            document.getElementById('permission-status').textContent = '⏳ Belum Ditanya';
+          }
+        }).catch(() => {
+          document.getElementById('permission-status').textContent = '❓ Tidak Diketahui';
+        });
+      } else {
+        document.getElementById('permission-status').textContent = '❓ Tidak Didukung';
+      }
     }
 
     function initGPS() {
@@ -561,60 +615,84 @@
         showToast('PENTING: Klik "Izinkan" atau "Allow" saat browser meminta akses lokasi!', 'info');
       }
 
-      // Coba dengan pengaturan paling permisif dulu
-      const options = {
-        enableHighAccuracy: false,
-        maximumAge: 600000, // 10 menit
-        timeout: 30000 // 30 detik
-      };
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          // Berhasil mendapat posisi
-          currentPosition = position;
-          updateCurrentLocation(position);
-          updateStatus('✅ GPS Aktif dan Siap!', 'active');
-          document.getElementById('record-btn').disabled = false;
-          hideRetryButton();
-          document.getElementById('gps-help').classList.remove('show');
-          
-          showToast('🎉 GPS berhasil aktif! Sekarang Anda bisa merekam lokasi.', 'success');
-          
-          // Mulai tracking kontinyu dengan pengaturan lebih baik
-          startContinuousTracking();
-        },
-        (error) => {
-          console.log('GPS Error:', error.code, error.message);
-          
-          // Jika gagal, coba lagi dengan pengaturan berbeda
-          if (gpsRetryCount === 1) {
-            // Coba kedua dengan high accuracy
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                currentPosition = position;
-                updateCurrentLocation(position);
-                updateStatus('✅ GPS Aktif (High Accuracy)', 'active');
-                document.getElementById('record-btn').disabled = false;
-                hideRetryButton();
-                document.getElementById('gps-help').classList.remove('show');
-                showToast('GPS aktif dengan akurasi tinggi!', 'success');
-                startContinuousTracking();
-              },
-              (error2) => {
-                handleGPSError(error2);
-              },
-              {
-                enableHighAccuracy: true,
-                maximumAge: 0,
-                timeout: 15000
-              }
-            );
-          } else {
-            handleGPSError(error);
+      // Strategi bertahap: coba beberapa konfigurasi berbeda
+      const strategies = [
+        {
+          name: 'Basic GPS',
+          options: {
+            enableHighAccuracy: false,
+            maximumAge: 300000, // 5 menit
+            timeout: 10000 // 10 detik
           }
         },
-        options
-      );
+        {
+          name: 'Network Location',
+          options: {
+            enableHighAccuracy: false,
+            maximumAge: 600000, // 10 menit
+            timeout: 15000 // 15 detik
+          }
+        },
+        {
+          name: 'High Accuracy GPS',
+          options: {
+            enableHighAccuracy: true,
+            maximumAge: 60000, // 1 menit
+            timeout: 20000 // 20 detik
+          }
+        },
+        {
+          name: 'Fallback Mode',
+          options: {
+            enableHighAccuracy: false,
+            maximumAge: 900000, // 15 menit
+            timeout: 30000 // 30 detik
+          }
+        }
+      ];
+
+      let currentStrategy = 0;
+
+      function tryNextStrategy() {
+        if (currentStrategy >= strategies.length) {
+          // Semua strategi gagal, tampilkan error dan tombol manual
+          updateStatus('❌ GPS tidak dapat diaktifkan', 'inactive');
+          showRetryButton();
+          showToast('GPS tidak dapat diaktifkan. Gunakan "Input Manual" untuk memasukkan koordinat.', 'error');
+          return;
+        }
+
+        const strategy = strategies[currentStrategy];
+        updateStatus(`🔍 Mencoba ${strategy.name}... (${currentStrategy + 1}/${strategies.length})`, 'waiting');
+        
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            // Berhasil mendapat posisi
+            currentPosition = position;
+            updateCurrentLocation(position);
+            updateStatus(`✅ GPS Aktif (${strategy.name})`, 'active');
+            document.getElementById('record-btn').disabled = false;
+            hideRetryButton();
+            document.getElementById('gps-help').classList.remove('show');
+            
+            showToast(`🎉 GPS berhasil aktif dengan ${strategy.name}!`, 'success');
+            
+            // Mulai tracking kontinyu
+            startContinuousTracking();
+          },
+          (error) => {
+            console.log(`GPS Error (${strategy.name}):`, error.code, error.message);
+            
+            // Coba strategi berikutnya setelah delay singkat
+            currentStrategy++;
+            setTimeout(tryNextStrategy, 2000);
+          },
+          strategy.options
+        );
+      }
+
+      // Mulai dengan strategi pertama
+      tryNextStrategy();
     }
 
     function startContinuousTracking() {
@@ -952,5 +1030,5 @@
     // Mulai aplikasi
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a6b6d71519c5f',t:'MTc2MjE1NzY4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a71c0234333d1',t:'MTc2MjE1Nzk0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
