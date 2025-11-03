@@ -342,7 +342,7 @@
     <div class="location-item"><span class="location-label">Akurasi:</span> <span class="location-value" id="current-accuracy">-</span>
     </div>
    </div>
-   <div class="button-group"><button id="record-btn" class="btn-primary" disabled> <span id="record-btn-text">Rekam Lokasi</span> </button> <button id="retry-gps-btn" class="btn-warning" style="display: none;"> 🔄 Coba Lagi GPS </button> <button id="manual-btn" class="btn-warning" style="display: none;"> 📝 Input Manual </button> <button id="help-btn" class="btn-secondary"> ❓ Bantuan GPS </button> <button id="export-btn" class="btn-secondary"> <span id="export-btn-text">Ekspor Data</span> </button>
+   <div class="button-group"><button id="record-btn" class="btn-primary" disabled> <span id="record-btn-text">Rekam Lokasi</span> </button> <button id="retry-gps-btn" class="btn-warning" style="display: none;"> 🔄 Coba Lagi GPS </button> <button id="manual-btn" class="btn-warning" style="display: none;"> 📝 Input Manual </button> <button id="help-btn" class="btn-secondary"> ❓ Bantuan GPS </button> <button id="tech-info-btn" class="btn-secondary"> 🔧 Info Teknologi </button> <button id="export-btn" class="btn-secondary"> <span id="export-btn-text">Ekspor Data</span> </button>
    </div>
    <div id="manual-input" class="gps-help" style="display: none;">
     <h3>📝 Input Koordinat Manual:</h3>
@@ -351,6 +351,56 @@
      </div>
     </div>
     <p style="font-size: 12px; color: #666; margin: 10px 0 0 0;"><strong>Tips:</strong> Anda bisa mendapatkan koordinat dari Google Maps dengan klik kanan pada lokasi dan pilih koordinat yang muncul.</p>
+   </div>
+   <div id="tech-info" class="gps-help" style="display: none;">
+    <h3>🔧 Teknologi yang Digunakan:</h3>
+    <div style="margin: 15px 0;">
+     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">🌐 Frontend Technologies:</h4>
+     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
+      <li><strong>HTML5:</strong> Struktur halaman web modern</li>
+      <li><strong>CSS3:</strong> Styling dengan gradients, animations, flexbox</li>
+      <li><strong>JavaScript (ES6+):</strong> Logika aplikasi dan interaksi</li>
+      <li><strong>Responsive Design:</strong> Tampilan optimal di semua perangkat</li>
+     </ul>
+     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">📍 GPS &amp; Location APIs:</h4>
+     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
+      <li><strong>Geolocation API:</strong> Akses GPS perangkat</li>
+      <li><strong>getCurrentPosition():</strong> Mendapatkan lokasi saat ini</li>
+      <li><strong>watchPosition():</strong> Tracking lokasi real-time</li>
+      <li><strong>Coordinate System:</strong> Latitude/Longitude (WGS84)</li>
+     </ul>
+     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">💾 Data Storage:</h4>
+     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
+      <li><strong>Canva Data SDK:</strong> Penyimpanan data ke Canva Sheet</li>
+      <li><strong>CRUD Operations:</strong> Create, Read, Update, Delete</li>
+      <li><strong>Real-time Sync:</strong> Data tersinkronisasi otomatis</li>
+      <li><strong>Offline Capable:</strong> Bekerja tanpa koneksi internet</li>
+     </ul>
+     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">🎨 UI/UX Features:</h4>
+     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
+      <li><strong>Canva Elements SDK:</strong> Customizable colors &amp; fonts</li>
+      <li><strong>Toast Notifications:</strong> Feedback pengguna real-time</li>
+      <li><strong>Loading States:</strong> Indikator proses yang sedang berjalan</li>
+      <li><strong>Error Handling:</strong> Penanganan error yang user-friendly</li>
+     </ul>
+     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">📤 Export &amp; Compatibility:</h4>
+     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
+      <li><strong>CSV Export:</strong> Download data dalam format spreadsheet</li>
+      <li><strong>Blob API:</strong> Pembuatan file di browser</li>
+      <li><strong>Cross-browser:</strong> Chrome, Safari, Firefox, Edge</li>
+      <li><strong>Mobile Responsive:</strong> Android &amp; iOS compatible</li>
+     </ul>
+     <h4 style="color: #0066cc; margin: 15px 0 8px 0; font-size: 14px;">🔒 Security &amp; Privacy:</h4>
+     <ul style="margin: 5px 0; padding-left: 20px; font-size: 13px;">
+      <li><strong>Permission-based:</strong> Meminta izin akses lokasi</li>
+      <li><strong>Local Processing:</strong> Data diproses di perangkat</li>
+      <li><strong>No External APIs:</strong> Tidak mengirim data ke server luar</li>
+      <li><strong>Sandboxed:</strong> Berjalan dalam iframe yang aman</li>
+     </ul>
+    </div>
+    <div style="background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 15px;">
+     <p style="margin: 0; font-size: 12px; color: #0066cc;"><strong>💡 Fun Fact:</strong> Aplikasi ini menggunakan teknologi web modern yang sama dengan aplikasi mobile native, namun berjalan langsung di browser tanpa perlu instalasi!</p>
+    </div><button id="close-tech-info-btn" class="btn-secondary" style="width: 100%; margin-top: 15px;">❌ Tutup</button>
    </div>
    <div class="records-section">
     <div class="records-header">
@@ -642,6 +692,8 @@
       document.getElementById('export-btn').addEventListener('click', exportData);
       document.getElementById('retry-gps-btn').addEventListener('click', retryGPS);
       document.getElementById('help-btn').addEventListener('click', toggleHelp);
+      document.getElementById('tech-info-btn').addEventListener('click', showTechInfo);
+      document.getElementById('close-tech-info-btn').addEventListener('click', hideTechInfo);
       document.getElementById('manual-btn').addEventListener('click', showManualInput);
       document.getElementById('save-manual-btn').addEventListener('click', saveManualCoordinates);
       document.getElementById('cancel-manual-btn').addEventListener('click', hideManualInput);
@@ -682,9 +734,21 @@
       }
     }
 
+    function showTechInfo() {
+      document.getElementById('tech-info').style.display = 'block';
+      document.getElementById('gps-help').classList.remove('show');
+      document.getElementById('manual-input').style.display = 'none';
+      showToast('Lihat teknologi yang digunakan dalam aplikasi ini', 'info');
+    }
+
+    function hideTechInfo() {
+      document.getElementById('tech-info').style.display = 'none';
+    }
+
     function showManualInput() {
       document.getElementById('manual-input').style.display = 'block';
       document.getElementById('gps-help').classList.remove('show');
+      document.getElementById('tech-info').style.display = 'none';
       showToast('Masukkan koordinat latitude dan longitude secara manual', 'info');
     }
 
@@ -888,5 +952,5 @@
     // Mulai aplikasi
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a6653072f9c5f',t:'MTc2MjE1NzQ3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a6b6d71519c5f',t:'MTc2MjE1NzY4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
