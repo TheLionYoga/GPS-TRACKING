@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPS Tracker Offline</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 30px;
+      margin: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #667eea;
+      margin: 0 0 10px 0;
+      font-size: 28px;
+    }
+
+    .status {
+      text-align: center;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .status.active {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status.inactive {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status.waiting {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .current-location {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .location-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    .location-label {
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .location-value {
+      color: #667eea;
+      font-family: 'Courier New', monospace;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+    }
+
+    .records-section {
+      margin-top: 30px;
+    }
+
+    .records-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .records-header h2 {
+      margin: 0;
+      color: #495057;
+      font-size: 20px;
+    }
+
+    .record-count {
+      background: #667eea;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .records-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .record-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .record-time {
+      font-size: 12px;
+      color: #6c757d;
+    }
+
+    .record-coords {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #495057;
+      margin: 5px 0;
+    }
+
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .delete-btn:hover {
+      background: #c82333;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #6c757d;
+    }
+
+    .empty-state svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #28a745;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      display: none;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      display: block;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .loading {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 0.6s linear infinite;
+      margin-left: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container">
+   <h1 id="app-title">GPS Tracker Offline</h1>
+   <div id="status" class="status inactive">
+    GPS Tidak Aktif
+   </div>
+   <div class="current-location">
+    <div class="location-item"><span class="location-label">Latitude:</span> <span class="location-value" id="current-lat">-</span>
+    </div>
+    <div class="location-item"><span class="location-label">Longitude:</span> <span class="location-value" id="current-lng">-</span>
+    </div>
+    <div class="location-item"><span class="location-label">Akurasi:</span> <span class="location-value" id="current-accuracy">-</span>
+    </div>
+   </div>
+   <div class="button-group"><button id="record-btn" class="btn-primary" disabled> <span id="record-btn-text">Rekam Lokasi</span> </button> <button id="export-btn" class="btn-secondary"> <span id="export-btn-text">Ekspor Data</span> </button>
+   </div>
+   <div class="records-section">
+    <div class="records-header">
+     <h2>Riwayat Rekaman</h2><span class="record-count" id="record-count">0</span>
+    </div>
+    <div class="records-list" id="records-list">
+     <div class="empty-state">
+      <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path> <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+      <p>Belum ada lokasi yang direkam</p>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script>
+    const defaultConfig = {
+      app_title: "GPS Tracker Offline",
+      record_button_text: "Rekam Lokasi",
+      export_button_text: "Ekspor Data",
+      primary_color: "#667eea",
+      surface_color: "#f8f9fa",
+      text_color: "#495057",
+      button_color: "#667eea",
+      secondary_button_color: "#6c757d"
+    };
+
+    let currentPosition = null;
+    let watchId = null;
+    let allRecords = [];
+    let isRecording = false;
+
+    const dataHandler = {
+      onDataChanged(data) {
+        allRecords = data;
+        renderRecords(data);
+        updateRecordCount(data.length);
+      }
+    };
+
+    async function onConfigChange(config) {
+      const appTitle = config.app_title || defaultConfig.app_title;
+      const recordBtnText = config.record_button_text || defaultConfig.record_button_text;
+      const exportBtnText = config.export_button_text || defaultConfig.export_button_text;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const buttonColor = config.button_color || defaultConfig.button_color;
+      const secondaryButtonColor = config.secondary_button_color || defaultConfig.secondary_button_color;
+
+      document.getElementById('app-title').textContent = appTitle;
+      document.getElementById('record-btn-text').textContent = recordBtnText;
+      document.getElementById('export-btn-text').textContent = exportBtnText;
+
+      document.getElementById('app-title').style.color = primaryColor;
+      document.querySelectorAll('.btn-primary').forEach(btn => {
+        btn.style.background = buttonColor;
+      });
+      document.querySelectorAll('.btn-secondary').forEach(btn => {
+        btn.style.background = secondaryButtonColor;
+      });
+      document.querySelector('.record-count').style.background = primaryColor;
+      document.querySelectorAll('.location-value').forEach(el => {
+        el.style.color = primaryColor;
+      });
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.primary_color || defaultConfig.primary_color,
+            set: (value) => {
+              config.primary_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ primary_color: value });
+            }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              config.surface_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ surface_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.button_color || defaultConfig.button_color,
+            set: (value) => {
+              config.button_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ button_color: value });
+            }
+          },
+          {
+            get: () => config.secondary_button_color || defaultConfig.secondary_button_color,
+            set: (value) => {
+              config.secondary_button_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ secondary_button_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["app_title", config.app_title || defaultConfig.app_title],
+        ["record_button_text", config.record_button_text || defaultConfig.record_button_text],
+        ["export_button_text", config.export_button_text || defaultConfig.export_button_text]
+      ]);
+    }
+
+    async function initApp() {
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities,
+          mapToEditPanelValues
+        });
+      }
+
+      const initResult = await window.dataSdk.init(dataHandler);
+      if (!initResult.isOk) {
+        showToast('Gagal menginisialisasi penyimpanan data', 'error');
+        return;
+      }
+
+      initGPS();
+      setupEventListeners();
+    }
+
+    function initGPS() {
+      if (!navigator.geolocation) {
+        updateStatus('GPS tidak didukung di browser ini', 'inactive');
+        return;
+      }
+
+      updateStatus('Menunggu sinyal GPS...', 'waiting');
+
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          currentPosition = position;
+          updateCurrentLocation(position);
+          updateStatus('GPS Aktif', 'active');
+          document.getElementById('record-btn').disabled = false;
+        },
+        (error) => {
+          let message = 'GPS Tidak Aktif';
+          if (error.code === 1) {
+            message = 'Izin lokasi ditolak';
+          } else if (error.code === 2) {
+            message = 'Lokasi tidak tersedia';
+          } else if (error.code === 3) {
+            message = 'Timeout mendapatkan lokasi';
+          }
+          updateStatus(message, 'inactive');
+          document.getElementById('record-btn').disabled = true;
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 10000
+        }
+      );
+    }
+
+    function updateStatus(message, type) {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+    }
+
+    function updateCurrentLocation(position) {
+      document.getElementById('current-lat').textContent = position.coords.latitude.toFixed(6);
+      document.getElementById('current-lng').textContent = position.coords.longitude.toFixed(6);
+      document.getElementById('current-accuracy').textContent = `±${position.coords.accuracy.toFixed(1)}m`;
+    }
+
+    function setupEventListeners() {
+      document.getElementById('record-btn').addEventListener('click', recordLocation);
+      document.getElementById('export-btn').addEventListener('click', exportData);
+    }
+
+    async function recordLocation() {
+      if (!currentPosition || isRecording) return;
+
+      if (allRecords.length >= 999) {
+        showToast('Batas maksimum 999 rekaman tercapai. Hapus beberapa rekaman terlebih dahulu.', 'error');
+        return;
+      }
+
+      isRecording = true;
+      const recordBtn = document.getElementById('record-btn');
+      const originalText = recordBtn.innerHTML;
+      recordBtn.innerHTML = '<span>Merekam...</span><span class="loading"></span>';
+      recordBtn.disabled = true;
+
+      const record = {
+        id: Date.now().toString(),
+        latitude: currentPosition.coords.latitude,
+        longitude: currentPosition.coords.longitude,
+        accuracy: currentPosition.coords.accuracy,
+        timestamp: new Date().toISOString(),
+        label: `Lokasi ${allRecords.length + 1}`
+      };
+
+      const result = await window.dataSdk.create(record);
+
+      if (result.isOk) {
+        showToast('Lokasi berhasil direkam!', 'success');
+      } else {
+        showToast('Gagal merekam lokasi', 'error');
+      }
+
+      recordBtn.innerHTML = originalText;
+      recordBtn.disabled = false;
+      isRecording = false;
+    }
+
+    function renderRecords(records) {
+      const listEl = document.getElementById('records-list');
+      
+      if (records.length === 0) {
+        listEl.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <p>Belum ada lokasi yang direkam</p>
+          </div>
+        `;
+        return;
+      }
+
+      const sortedRecords = [...records].sort((a, b) => 
+        new Date(b.timestamp) - new Date(a.timestamp)
+      );
+
+      listEl.innerHTML = sortedRecords.map(record => {
+        const date = new Date(record.timestamp);
+        const formattedDate = date.toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        return `
+          <div class="record-item" data-id="${record.id}">
+            <div class="record-header">
+              <span class="record-time">${formattedDate}</span>
+              <button class="delete-btn" onclick="deleteRecord('${record.id}')">Hapus</button>
+            </div>
+            <div class="record-coords">Lat: ${record.latitude.toFixed(6)}</div>
+            <div class="record-coords">Lng: ${record.longitude.toFixed(6)}</div>
+            <div class="record-coords">Akurasi: ±${record.accuracy.toFixed(1)}m</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateRecordCount(count) {
+      document.getElementById('record-count').textContent = count;
+    }
+
+    async function deleteRecord(id) {
+      const record = allRecords.find(r => r.id === id);
+      if (!record) return;
+
+      const result = await window.dataSdk.delete(record);
+
+      if (result.isOk) {
+        showToast('Rekaman dihapus', 'success');
+      } else {
+        showToast('Gagal menghapus rekaman', 'error');
+      }
+    }
+
+    function exportData() {
+      if (allRecords.length === 0) {
+        showToast('Tidak ada data untuk diekspor', 'error');
+        return;
+      }
+
+      const csvContent = [
+        ['No', 'Tanggal', 'Waktu', 'Latitude', 'Longitude', 'Akurasi (m)'].join(','),
+        ...allRecords.map((record, index) => {
+          const date = new Date(record.timestamp);
+          return [
+            index + 1,
+            date.toLocaleDateString('id-ID'),
+            date.toLocaleTimeString('id-ID'),
+            record.latitude,
+            record.longitude,
+            record.accuracy.toFixed(1)
+          ].join(',');
+        })
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `gps-tracker-${Date.now()}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast('Data berhasil diekspor!', 'success');
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.background = type === 'success' ? '#28a745' : '#dc3545';
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    window.deleteRecord = deleteRecord;
+
+    initApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998a532f7006a8e1',t:'MTc2MjE1NjY5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
