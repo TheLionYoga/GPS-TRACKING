@@ -464,6 +464,14 @@
        • GPS offline lebih akurat di siang hari
      </div>
     </div>
+    <div class="offline-storage" id="offlineStorage" style="display: none;">
+     <div style="background: #e0f2fe; border: 1px solid #0288d1; border-radius: 8px; padding: 12px; margin-top: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+       <div><strong id="offlineCounter">📦 0 data tersimpan offline</strong><br><small style="color: #0277bd;">Data akan otomatis dikirim saat internet tersambung</small>
+       </div><button id="syncBtn" class="sync-btn" onclick="manualSync()" style="background: #0288d1; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;"> 🔄 Sinkron Sekarang </button>
+      </div>
+     </div>
+    </div>
    </div>
    <div class="location-section">
     <h2 id="locationTitle">Informasi Lokasi Realtime</h2>
@@ -731,6 +739,8 @@
         // Monitor perubahan koneksi internet
         window.addEventListener('online', () => {
           showGPSNotification('🌐 Internet tersambung kembali - GPS akan lebih cepat', 'success');
+          // Auto sync when back online
+          autoSyncWhenOnline();
         });
         
         window.addEventListener('offline', () => {
@@ -773,6 +783,98 @@
     
     // Google Apps Script URL - Ganti dengan URL Web App Anda
     const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxepvn4dywGjFYlCm0xRQ9ViqSQi8IYw3ARikOyoeC_Vd3TIIaXhHH4_MWDH2ToKWtA/exec';
+    
+    // Offline storage management
+    function saveToOfflineStorage(data) {
+      try {
+        const offlineData = JSON.parse(localStorage.getItem('offlineCoordinates') || '[]');
+        offlineData.push({
+          ...data,
+          offlineId: Date.now() + Math.random(),
+          savedOffline: true,
+          offlineTimestamp: new Date().toISOString()
+        });
+        localStorage.setItem('offlineCoordinates', JSON.stringify(offlineData));
+        return true;
+      } catch (error) {
+        console.error('Error saving to offline storage:', error);
+        return false;
+      }
+    }
+    
+    function getOfflineData() {
+      try {
+        return JSON.parse(localStorage.getItem('offlineCoordinates') || '[]');
+      } catch (error) {
+        console.error('Error reading offline data:', error);
+        return [];
+      }
+    }
+    
+    function clearOfflineData() {
+      try {
+        localStorage.removeItem('offlineCoordinates');
+        return true;
+      } catch (error) {
+        console.error('Error clearing offline data:', error);
+        return false;
+      }
+    }
+    
+    function updateOfflineCounter() {
+      const offlineData = getOfflineData();
+      const counter = document.getElementById('offlineCounter');
+      if (counter) {
+        if (offlineData.length > 0) {
+          counter.textContent = `📦 ${offlineData.length} data tersimpan offline`;
+          counter.style.display = 'block';
+        } else {
+          counter.style.display = 'none';
+        }
+      }
+    }
+    
+    async function syncOfflineData() {
+      const offlineData = getOfflineData();
+      if (offlineData.length === 0) return { success: true, synced: 0 };
+      
+      if (!checkInternetConnection()) {
+        return { success: false, error: 'No internet connection' };
+      }
+      
+      let syncedCount = 0;
+      let failedCount = 0;
+      const remainingData = [];
+      
+      for (const data of offlineData) {
+        try {
+          const result = await sendToGoogleSheets(data);
+          if (result.success) {
+            syncedCount++;
+          } else {
+            remainingData.push(data);
+            failedCount++;
+          }
+        } catch (error) {
+          remainingData.push(data);
+          failedCount++;
+        }
+        
+        // Small delay between requests
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      // Update offline storage with remaining data
+      localStorage.setItem('offlineCoordinates', JSON.stringify(remainingData));
+      updateOfflineCounter();
+      
+      return { 
+        success: syncedCount > 0, 
+        synced: syncedCount, 
+        failed: failedCount,
+        remaining: remainingData.length
+      };
+    }
     
     async function sendToGoogleSheets(data) {
       try {
@@ -885,15 +987,38 @@
         }
       }
       
-      // Send to Google Sheets
-      console.log('Sending to Google Sheets...');
-      const googleResult = await sendToGoogleSheets(googleSheetsData);
-      console.log('Google Sheets result:', googleResult);
+      // Handle Google Sheets submission based on internet connection
+      const isOnline = checkInternetConnection();
       
-      if (googleResult.success) {
-        showToast('📍 Data berhasil dikirim ke Google Sheets!');
+      if (isOnline) {
+        // Try to send to Google Sheets
+        console.log('Sending to Google Sheets...');
+        const googleResult = await sendToGoogleSheets(googleSheetsData);
+        console.log('Google Sheets result:', googleResult);
+        
+        if (googleResult.success) {
+          showToast('📍 Data berhasil dikirim ke Google Sheets!');
+        } else {
+          // Failed to send online, save offline
+          const offlineSaved = saveToOfflineStorage(googleSheetsData);
+          if (offlineSaved) {
+            showToast('📦 Data disimpan offline, akan dikirim saat internet tersambung');
+            updateOfflineCounter();
+            showOfflineStorage();
+          } else {
+            showToast('⚠️ Gagal menyimpan data');
+          }
+        }
       } else {
-        showToast('⚠️ Gagal mengirim ke Google Sheets');
+        // No internet, save offline
+        const offlineSaved = saveToOfflineStorage(googleSheetsData);
+        if (offlineSaved) {
+          showToast('📦 Data disimpan offline, akan dikirim saat internet tersambung');
+          updateOfflineCounter();
+          showOfflineStorage();
+        } else {
+          showToast('⚠️ Gagal menyimpan data offline');
+        }
       }
       
       // Reset form
@@ -1062,6 +1187,70 @@
       }
     });
     
+    function showOfflineStorage() {
+      const offlineStorage = document.getElementById('offlineStorage');
+      if (offlineStorage) {
+        offlineStorage.style.display = 'block';
+      }
+    }
+    
+    function hideOfflineStorage() {
+      const offlineStorage = document.getElementById('offlineStorage');
+      if (offlineStorage) {
+        offlineStorage.style.display = 'none';
+      }
+    }
+    
+    async function autoSyncWhenOnline() {
+      const offlineData = getOfflineData();
+      if (offlineData.length === 0) return;
+      
+      showToast('🔄 Menyinkronkan data offline...');
+      
+      const syncResult = await syncOfflineData();
+      if (syncResult.success && syncResult.synced > 0) {
+        showToast(`✅ ${syncResult.synced} data berhasil dikirim ke Google Sheets!`);
+        if (syncResult.remaining === 0) {
+          hideOfflineStorage();
+        }
+      } else if (syncResult.failed > 0) {
+        showToast(`⚠️ ${syncResult.failed} data gagal dikirim, akan dicoba lagi nanti`);
+      }
+    }
+    
+    async function manualSync() {
+      const syncBtn = document.getElementById('syncBtn');
+      if (!checkInternetConnection()) {
+        showToast('❌ Tidak ada koneksi internet');
+        return;
+      }
+      
+      const offlineData = getOfflineData();
+      if (offlineData.length === 0) {
+        showToast('✅ Tidak ada data offline untuk disinkronkan');
+        return;
+      }
+      
+      syncBtn.disabled = true;
+      syncBtn.innerHTML = '🔄 Menyinkronkan...';
+      
+      const syncResult = await syncOfflineData();
+      
+      if (syncResult.success && syncResult.synced > 0) {
+        showToast(`✅ ${syncResult.synced} data berhasil dikirim ke Google Sheets!`);
+        if (syncResult.remaining === 0) {
+          hideOfflineStorage();
+        }
+      } else if (syncResult.failed > 0) {
+        showToast(`⚠️ ${syncResult.failed} data gagal dikirim`);
+      } else {
+        showToast('❌ Gagal menyinkronkan data');
+      }
+      
+      syncBtn.disabled = false;
+      syncBtn.innerHTML = '🔄 Sinkron Sekarang';
+    }
+    
     async function init() {
       console.log('Initializing app...');
       console.log('Data SDK available:', !!window.dataSdk);
@@ -1069,6 +1258,13 @@
       
       // Wait a bit for SDKs to load
       await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Initialize offline storage UI
+      updateOfflineCounter();
+      const offlineData = getOfflineData();
+      if (offlineData.length > 0) {
+        showOfflineStorage();
+      }
       
       // Initialize Data SDK - silent operation
       if (window.dataSdk) {
@@ -1148,5 +1344,5 @@
     
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99904cbfe5b7d439',t:'MTc2MjIxOTM0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99905cfb330d86fb',t:'MTc2MjIyMDAwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
