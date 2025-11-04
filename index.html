@@ -3,15 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pencatat Koordinat</title><!-- PWA Meta Tags -->
-  <meta name="theme-color" content="#667eea">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Pencatat Koordinat">
-  <meta name="description" content="Aplikasi pencatat koordinat GPS untuk fasilitas pendidikan dan kesehatan di daerah terpencil"><!-- PWA Icons -->
-  <link rel="icon" type="image/png" sizes="192x192" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+CjxwYXRoIGQ9Ik0xMiAyQzguMTMgMiA1IDUuMTMgNSA5YzAgNS4yNSA3IDEzIDcgMTNzNy03Ljc1IDctMTNjMC0zLjg3LTMuMTMtNy03LTd6bTAgOS41Yy0xLjM4IDAtMi41LTEuMTItMi41LTIuNXMxLjEyLTIuNSAyLjUtMi41IDIuNSAxLjEyIDIuNSAyLjUtMS4xMiAyLjUtMi41IDIuNXoiLz4KPC9zdmc+Cjwvc3ZnPgo=">
-  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+CjxwYXRoIGQ9Ik0xMiAyQzguMTMgMiA1IDUuMTMgNSA5YzAgNS4yNSA3IDEzIDcgMTNzNy03Ljc1IDctMTNjMC0zLjg3LTMuMTMtNy03LTd6bTAgOS41Yy0xLjM4IDAtMi41LTEuMTItMi41LTIuNXMxLjEyLTIuNSAyLjUtMi41IDIuNSAxLjEyIDIuNSAyLjUtMS4xMiAyLjUtMi41IDIuNXoiLz4KPC9zdmc+Cjwvc3ZnPgo="><!-- PWA Manifest -->
-  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlBlbmNhdGF0IEtvb3JkaW5hdCIsCiAgInNob3J0X25hbWUiOiAiUGVuY2F0YXQgR1BTIiwKICAiZGVzY3JpcHRpb24iOiAiQXBsaWthc2kgcGVuY2F0YXQga29vcmRpbmF0IEdQUyB1bnR1ayBmYXNpbGl0YXMgcGVuZGlkaWthbiBkYW4ga2VzZWhhdGFuIGRpIGRhZXJhaCB0ZXJwZW5jaWwiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzY2N2VlYSIsCiAgInRoZW1lX2NvbG9yIjogIiM2NjdlZWEiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU1Ua3lJaUJvWldsbmFIUTlJakU1TWlJZ2RtbGxkMEp2ZUQwaU1DQXdJREU1TWlBeE9USWlJR1pwYkd3OUltNXZibVVpSUhodGJHNXpQU0pvZEhSd09pOHZkM2QzTG5jekxtOXlaeTh5TURBd0wzTjJaeUkrQ2p4eVpXTjBJSGRwWkhSb1BTSXhPVElpSUdobGFXZG9kRDBpTVRreUlpQnllRDBpTWpRaUlHWnBiR3c5SWlNMk5qZGxaV0VpTHo0S1BITjJaeUI0UFNJME9DSWdlVDBpTkRnaUlIZHBaSFJvUFNJNU5pSWdhR1ZwWjJoMFBTSTVOaUlnZG1sbGQwSnZlRDBpTUNBd0lESTBJREkwSWlCbWFXeHNQU0ozYUdsMFpTSStDanh3WVhSb0lHUTlTVTB4TWlBeVF6Z3VNVE1nTWlBMUlEVXVNVE1nTlNBNVl6QWdOUzR5TlNBM0lERXpJRGNnTVROek55MDNMRGN6SURjdE1UTmpNQzB6TGpnM0xUTXVNVE10TnkwM0xUY3RlbTBnTUNBNUxqVmpMVEV1TXpnZ01DMHlMalVnTVMweUxqVWdNaTQxTFRFeUxqVWdNaTQxTFRJdU5TQXhMakV5SURJdU5TQXlMalVnTWk0MUxURXVNVElnTWk0MUxUSXVOU0F5TGpWNklpOCtDand2YzNabkNqd3ZjM1puUGdvOSIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTlRFeUlpQm9aV2xuYUhROUlqVXhNaUlnZG1sbGQwSnZlRDBpTUNBd0lEVXhNaUExTVRJaUlHWnBiR3c5SW01dmJtVWlJSGh0Ykc1elBTSm9kSFJ3T2k4dmQzZDNMbmN6TG05eVp5OHlNREF3TDNOMlp5SStDanh5WldOMElIZHBaSFJvUFNJMU1USWlJR2hsYVdkb2REMGlOVEV5SWlCeWVEMGlNelFpSUdacGJHdzlJaU0yTmpkbFpXRWlMejRLUEhOMlp5QjRQU0l4TWpnaUlIazlJakV5T0NJZ2QybGtkR2c5SWpJMU5pSWdhR1ZwWjJoMFBTSXlOVFlpSUhabGFXZENiM2c5SWpBZ01DQXlOQ0F5TkNJZ1ptbHNiRDBpZDJocGRHVWlQZ29nSUNBZ1BIQmhkR2dnWkQxTk1USWdNa000TGpFeklESWdOU0ExTGpFeklEVWdPV016SURBZ05TNHlOU0EzSURFeklEY2dNVE56TnkwM0xqYzFJRGN0TVROak1DMHpMamczTFRNdU1UTXROeTAzTFRjdGVtMGdNQ0E1TGpWakxURXVNemduTFRJdU5TMHhMakV5TFRJdU5TMHlMalZ6TVM0eE1pMHlMalVnTWk0MUxUSXVOU0F5TGpVZ01TNHhNaUF5TGpVZ01pNDFMVEV1TVRJZ01pNDFMVEl1TlNBeUxqVjZJaTgrQ2p3dmMzWm5Qam9LUEhCaGRHZ2daRDBpVFRJME5DQXhNVEZqTFRJdU5qZ2dNQzAxTGpJZ01pNHlMVGN1TlNBM0xqVXRNVEF1TlNBeE1DNDFMVEUwTGpVZ01UUXVOUzB4TkM0MUlERTBMalV0TVRBdU5TQXhNQzQxTFRjdU5TQTNMalV0TVRBdU5TQXhNQzQxZWlJdlBnbzhMM04yWno0S1BDOXpkbWMrQ2c9PSIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdLAogICJjYXRlZ29yaWVzIjogWyJ1dGlsaXRpZXMiLCAibmF2aWdhdGlvbiIsICJwcm9kdWN0aXZpdHkiXQp9">
+  <title>Pencatat Koordinat</title>
   <script src="/_sdk/element_sdk.js"></script>
   <script src="/_sdk/data_sdk.js"></script>
   <style>
@@ -366,45 +358,6 @@
       box-shadow: none;
     }
     
-    .gps-control-btn {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      font-size: 12px;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      display: inline-block;
-    }
-    
-    .gps-control-btn:hover:not(:disabled) {
-      background: #2563eb;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-    }
-    
-    .gps-control-btn:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    
-    .gps-status {
-      display: flex;
-      align-items: center;
-      font-size: 12px;
-      color: #64748b;
-      font-weight: 500;
-      padding: 8px 12px;
-      background: #f8fafc;
-      border-radius: 6px;
-      border: 1px solid #e2e8f0;
-    }
-    
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
@@ -468,21 +421,6 @@
       to {
         transform: translateX(-50%) translateY(0);
         opacity: 1;
-      }
-    }
-    
-    @keyframes pulse {
-      0% {
-        transform: scale(1);
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-      }
-      50% {
-        transform: scale(1.05);
-        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
-      }
-      100% {
-        transform: scale(1);
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
       }
     }
     
@@ -882,11 +820,6 @@
     </div>
     <div class="location-info" id="locationInfo"><strong>Lokasi Saat Ini:</strong> Memuat...
     </div>
-    <div class="gps-controls" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;"><button id="refreshGpsBtn" onclick="refreshGPS()" class="gps-control-btn"> 🔄 Muat Ulang GPS </button>
-     <div id="gpsStatus" class="gps-status">
-      📡 Mencari sinyal GPS...
-     </div>
-    </div>
     <div class="offline-tips" id="offlineTips" style="display: none;">
      <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin-top: 12px;"><strong>💡 Tips GPS Offline:</strong><br>
        • Pastikan berada di area terbuka (tidak di dalam gedung)<br>
@@ -900,14 +833,6 @@
       <div style="display: flex; justify-content: space-between; align-items: center;">
        <div><strong id="offlineCounter">📦 0 data tersimpan offline</strong><br><small style="color: #0277bd;">Data akan otomatis dikirim saat internet tersambung</small>
        </div><button id="syncBtn" class="sync-btn" onclick="manualSync()" style="background: #0288d1; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;"> 🔄 Sinkron Sekarang </button>
-      </div>
-     </div>
-    </div>
-    <div class="pwa-info" id="pwaInfo" style="display: none;">
-     <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 12px; margin-top: 12px;">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-       <div><strong>📱 Progressive Web App (PWA)</strong><br><small style="color: #0284c7;">Aplikasi dapat diinstall dan berjalan offline seperti aplikasi native</small>
-       </div><button id="pwaLearnMore" onclick="showPWAInfo()" style="background: #0ea5e9; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;"> ℹ️ Info PWA </button>
       </div>
      </div>
     </div>
@@ -1316,7 +1241,6 @@
       const accuracyValue = document.getElementById('accuracyValue');
       const timeValue = document.getElementById('timeValue');
       const mapsBtn = document.getElementById('openMapsBtn');
-      const gpsStatus = document.getElementById('gpsStatus');
       
       if (currentLocation) {
         const offlineStatus = currentLocation.isOffline ? ' 📡 (Mode Offline)' : ' 🌐 (Online)';
@@ -1329,25 +1253,6 @@
         lngValue.textContent = currentLocation.longitude.toFixed(8);
         accuracyValue.textContent = currentLocation.accuracy ? `±${currentLocation.accuracy.toFixed(0)}m` : 'N/A';
         timeValue.textContent = new Date().toLocaleTimeString('id-ID');
-        
-        // Update GPS status
-        const accuracy = currentLocation.accuracy || 0;
-        if (accuracy <= 10) {
-          gpsStatus.innerHTML = '✅ GPS Akurat';
-          gpsStatus.style.color = '#059669';
-          gpsStatus.style.background = '#f0fdf4';
-          gpsStatus.style.borderColor = '#22c55e';
-        } else if (accuracy <= 50) {
-          gpsStatus.innerHTML = '⚠️ GPS Cukup Akurat';
-          gpsStatus.style.color = '#d97706';
-          gpsStatus.style.background = '#fffbeb';
-          gpsStatus.style.borderColor = '#f59e0b';
-        } else {
-          gpsStatus.innerHTML = '❌ GPS Kurang Akurat';
-          gpsStatus.style.color = '#dc2626';
-          gpsStatus.style.background = '#fef2f2';
-          gpsStatus.style.borderColor = '#ef4444';
-        }
         
         // Enable maps button (works offline too, will open when internet available)
         mapsBtn.disabled = false;
@@ -1365,12 +1270,6 @@
         lngValue.textContent = '-';
         accuracyValue.textContent = '-';
         timeValue.textContent = '-';
-        
-        // Update GPS status
-        gpsStatus.innerHTML = '📡 Mencari sinyal GPS...';
-        gpsStatus.style.color = '#64748b';
-        gpsStatus.style.background = '#f8fafc';
-        gpsStatus.style.borderColor = '#e2e8f0';
         
         // Disable maps button
         mapsBtn.disabled = true;
@@ -1401,19 +1300,26 @@
       if ('geolocation' in navigator) {
         const isOnline = checkInternetConnection();
         
-        showGPSNotification('📍 Meminta izin akses lokasi...', 'warning');
+        if (isOnline) {
+          showGPSNotification('📍 Mencari lokasi GPS dengan bantuan internet...', 'warning');
+        } else {
+          showGPSNotification('📡 Mode Offline: Mencari lokasi GPS murni (tanpa internet). Proses mungkin lebih lama...', 'warning');
+        }
         
-        // Konfigurasi GPS yang lebih agresif
+        // Konfigurasi GPS untuk mode offline
         const gpsOptions = {
           enableHighAccuracy: true,
-          maximumAge: 0, // Selalu minta lokasi fresh
-          timeout: 30000 // 30 detik timeout
+          maximumAge: isOnline ? 1000 : 30000, // Cache lebih lama jika offline
+          timeout: isOnline ? 15000 : 60000    // Timeout lebih lama jika offline
         };
         
-        // Coba getCurrentPosition dulu untuk meminta permission
-        navigator.geolocation.getCurrentPosition(
+        locationWatchId = navigator.geolocation.watchPosition(
           (position) => {
-            console.log('Initial position obtained:', position);
+            // First time getting location - show success notification
+            if (!currentLocation) {
+              const connectionStatus = checkInternetConnection() ? 'dengan internet' : 'tanpa internet (GPS murni)';
+              showGPSNotification(`✅ GPS berhasil diaktifkan ${connectionStatus}!`, 'success');
+            }
             
             currentLocation = {
               latitude: position.coords.latitude,
@@ -1422,66 +1328,40 @@
               isOffline: !checkInternetConnection()
             };
             updateLocationDisplay();
-            
-            const connectionStatus = checkInternetConnection() ? 'dengan internet' : 'tanpa internet (GPS murni)';
-            showGPSNotification(`✅ GPS berhasil diaktifkan ${connectionStatus}!`, 'success');
-            
-            // Setelah berhasil, mulai watch position untuk update realtime
-            locationWatchId = navigator.geolocation.watchPosition(
-              (position) => {
-                currentLocation = {
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
-                  accuracy: position.coords.accuracy,
-                  isOffline: !checkInternetConnection()
-                };
-                updateLocationDisplay();
-              },
-              (error) => {
-                console.warn('Watch position error:', error);
-                // Jangan tampilkan error untuk watch position jika sudah ada lokasi
-                if (!currentLocation) {
-                  handleLocationError(error);
-                }
-              },
-              {
-                enableHighAccuracy: true,
-                maximumAge: 5000, // Cache 5 detik untuk watch
-                timeout: 15000
-              }
-            );
           },
           (error) => {
-            console.error('Error getting initial location:', error);
-            handleLocationError(error);
+            console.error('Error getting location:', error);
             
-            // Jika gagal dengan high accuracy, coba dengan accuracy rendah
-            if (gpsOptions.enableHighAccuracy) {
-              console.log('Retrying with lower accuracy...');
-              showGPSNotification('🔄 Mencoba dengan akurasi rendah...', 'warning');
-              
-              navigator.geolocation.getCurrentPosition(
-                (position) => {
-                  currentLocation = {
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    accuracy: position.coords.accuracy,
-                    isOffline: !checkInternetConnection()
-                  };
-                  updateLocationDisplay();
-                  showGPSNotification('✅ GPS berhasil dengan akurasi rendah!', 'success');
-                },
-                (error) => {
-                  console.error('Low accuracy also failed:', error);
-                  handleLocationError(error);
-                },
-                {
-                  enableHighAccuracy: false,
-                  maximumAge: 60000,
-                  timeout: 45000
+            let errorMessage = '';
+            const isOffline = !checkInternetConnection();
+            
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = '🚫 Akses lokasi ditolak. Silakan aktifkan GPS dan izinkan akses lokasi.';
+                break;
+              case error.POSITION_UNAVAILABLE:
+                if (isOffline) {
+                  errorMessage = '📡 GPS tidak dapat menemukan lokasi. Pastikan Anda berada di area terbuka dan tunggu lebih lama untuk sinyal satelit.';
+                } else {
+                  errorMessage = '📍 Lokasi tidak tersedia. Pastikan GPS aktif dan Anda berada di area terbuka.';
                 }
-              );
+                break;
+              case error.TIMEOUT:
+                if (isOffline) {
+                  errorMessage = '⏱️ GPS membutuhkan waktu lebih lama tanpa internet. Tetap di area terbuka dan tunggu...';
+                } else {
+                  errorMessage = '⏱️ Timeout mencari lokasi. Coba refresh halaman dan pastikan GPS aktif.';
+                }
+                break;
+              default:
+                errorMessage = isOffline ? 
+                  '❌ GPS tidak dapat mengunci lokasi. Pastikan berada di area terbuka tanpa penghalang.' :
+                  '❌ Tidak dapat mengakses lokasi. Pastikan GPS aktif.';
+                break;
             }
+            
+            showGPSNotification(errorMessage, 'error');
+            showToast('Tidak dapat mengakses lokasi');
           },
           gpsOptions
         );
@@ -1524,80 +1404,11 @@
       }
     }
     
-    function handleLocationError(error) {
-      let errorMessage = '';
-      const isOffline = !checkInternetConnection();
-      
-      switch(error.code) {
-        case error.PERMISSION_DENIED:
-          errorMessage = '🚫 Akses lokasi ditolak. Silakan aktifkan GPS dan izinkan akses lokasi di browser.';
-          break;
-        case error.POSITION_UNAVAILABLE:
-          if (isOffline) {
-            errorMessage = '📡 GPS tidak dapat menemukan lokasi. Pastikan Anda berada di area terbuka dan tunggu lebih lama untuk sinyal satelit.';
-          } else {
-            errorMessage = '📍 Lokasi tidak tersedia. Pastikan GPS aktif dan Anda berada di area terbuka.';
-          }
-          break;
-        case error.TIMEOUT:
-          if (isOffline) {
-            errorMessage = '⏱️ GPS membutuhkan waktu lebih lama tanpa internet. Tetap di area terbuka dan tunggu...';
-          } else {
-            errorMessage = '⏱️ Timeout mencari lokasi. Coba refresh halaman dan pastikan GPS aktif.';
-          }
-          break;
-        default:
-          errorMessage = isOffline ? 
-            '❌ GPS tidak dapat mengunci lokasi. Pastikan berada di area terbuka tanpa penghalang.' :
-            '❌ Tidak dapat mengakses lokasi. Pastikan GPS aktif.';
-          break;
-      }
-      
-      showGPSNotification(errorMessage, 'error');
-      showToast('Tidak dapat mengakses lokasi');
-    }
-    
     function stopLocationWatch() {
       if (locationWatchId) {
         navigator.geolocation.clearWatch(locationWatchId);
         locationWatchId = null;
       }
-    }
-    
-    function refreshGPS() {
-      const refreshBtn = document.getElementById('refreshGpsBtn');
-      const gpsStatus = document.getElementById('gpsStatus');
-      
-      // Disable button and show loading
-      refreshBtn.disabled = true;
-      refreshBtn.innerHTML = '🔄 Memuat Ulang...';
-      
-      // Update status
-      gpsStatus.innerHTML = '🔄 Memuat ulang GPS...';
-      gpsStatus.style.color = '#3b82f6';
-      gpsStatus.style.background = '#eff6ff';
-      gpsStatus.style.borderColor = '#3b82f6';
-      
-      // Clear current location
-      currentLocation = null;
-      updateLocationDisplay();
-      
-      // Stop current watch
-      stopLocationWatch();
-      
-      // Show notification
-      showGPSNotification('🔄 Memuat ulang GPS, tunggu sebentar...', 'warning');
-      
-      // Wait a moment then restart
-      setTimeout(() => {
-        startLocationWatch();
-        
-        // Re-enable button after 5 seconds
-        setTimeout(() => {
-          refreshBtn.disabled = false;
-          refreshBtn.innerHTML = '🔄 Muat Ulang GPS';
-        }, 5000);
-      }, 1000);
     }
     
     // Google Apps Script URL - Ganti dengan URL Web App Anda
@@ -2070,93 +1881,6 @@
       syncBtn.innerHTML = '🔄 Sinkron Sekarang';
     }
     
-    function showPWAInfo() {
-      const modal = document.createElement('div');
-      modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2000;
-        padding: 20px;
-        box-sizing: border-box;
-      `;
-      
-      const content = document.createElement('div');
-      content.style.cssText = `
-        background: white;
-        border-radius: 16px;
-        padding: 24px;
-        max-width: 500px;
-        width: 100%;
-        max-height: 80vh;
-        overflow-y: auto;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      `;
-      
-      content.innerHTML = `
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h2 style="margin: 0 0 8px 0; color: #1e293b;">📱 Progressive Web App (PWA)</h2>
-          <p style="margin: 0; color: #64748b;">Aplikasi modern yang dapat diinstall dan berjalan offline</p>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <h3 style="color: #059669; margin: 0 0 12px 0;">✅ Keunggulan PWA:</h3>
-          <ul style="margin: 0; padding-left: 20px; color: #475569;">
-            <li>Dapat diinstall seperti aplikasi native</li>
-            <li>Berjalan offline tanpa koneksi internet</li>
-            <li>GPS tetap berfungsi tanpa internet</li>
-            <li>Data tersimpan lokal dan auto-sync saat online</li>
-            <li>Notifikasi push (jika didukung)</li>
-            <li>Ukuran file lebih kecil dari aplikasi native</li>
-            <li>Update otomatis tanpa perlu download ulang</li>
-          </ul>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <h3 style="color: #0ea5e9; margin: 0 0 12px 0;">📱 Cara Install:</h3>
-          <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-            <strong style="color: #1e293b;">Android Chrome:</strong>
-            <ol style="margin: 8px 0 0 0; padding-left: 20px; color: #475569;">
-              <li>Buka aplikasi di Chrome</li>
-              <li>Tap menu (3 titik) → "Add to Home screen"</li>
-              <li>Atau tunggu popup "Install App" muncul</li>
-            </ol>
-          </div>
-          <div style="background: #f8fafc; padding: 16px; border-radius: 8px;">
-            <strong style="color: #1e293b;">iPhone Safari:</strong>
-            <ol style="margin: 8px 0 0 0; padding-left: 20px; color: #475569;">
-              <li>Buka aplikasi di Safari</li>
-              <li>Tap tombol Share → "Add to Home Screen"</li>
-              <li>Aplikasi akan muncul di home screen</li>
-            </ol>
-          </div>
-        </div>
-        
-        <div style="text-align: center;">
-          <button onclick="this.closest('.modal').remove()" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
-            ✅ Mengerti
-          </button>
-        </div>
-      `;
-      
-      modal.className = 'modal';
-      modal.appendChild(content);
-      document.body.appendChild(modal);
-      
-      // Close on backdrop click
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.remove();
-        }
-      });
-    }
-    
     // Dropdown functionality
     function toggleDropdown(id) {
       const content = document.getElementById(`content-${id}`);
@@ -2185,241 +1909,10 @@
       }
     }
 
-    // PWA Service Worker Registration
-    async function registerServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        try {
-          // Create service worker inline
-          const swCode = `
-            const CACHE_NAME = 'pencatat-koordinat-v1';
-            const urlsToCache = [
-              '/',
-              '/_sdk/element_sdk.js',
-              '/_sdk/data_sdk.js'
-            ];
-
-            // Install event - cache resources
-            self.addEventListener('install', (event) => {
-              event.waitUntil(
-                caches.open(CACHE_NAME)
-                  .then((cache) => {
-                    console.log('PWA: Cache opened');
-                    return cache.addAll(urlsToCache.filter(url => url !== '/'));
-                  })
-                  .catch((error) => {
-                    console.log('PWA: Cache failed', error);
-                  })
-              );
-              self.skipWaiting();
-            });
-
-            // Activate event - clean old caches
-            self.addEventListener('activate', (event) => {
-              event.waitUntil(
-                caches.keys().then((cacheNames) => {
-                  return Promise.all(
-                    cacheNames.map((cacheName) => {
-                      if (cacheName !== CACHE_NAME) {
-                        console.log('PWA: Deleting old cache', cacheName);
-                        return caches.delete(cacheName);
-                      }
-                    })
-                  );
-                })
-              );
-              self.clients.claim();
-            });
-
-            // Fetch event - serve from cache when offline
-            self.addEventListener('fetch', (event) => {
-              // Skip non-GET requests
-              if (event.request.method !== 'GET') {
-                return;
-              }
-
-              // Skip external URLs (Google Sheets, etc)
-              if (!event.request.url.startsWith(self.location.origin)) {
-                return;
-              }
-
-              event.respondWith(
-                caches.match(event.request)
-                  .then((response) => {
-                    // Return cached version or fetch from network
-                    if (response) {
-                      console.log('PWA: Serving from cache', event.request.url);
-                      return response;
-                    }
-                    
-                    return fetch(event.request).then((response) => {
-                      // Don't cache if not a valid response
-                      if (!response || response.status !== 200 || response.type !== 'basic') {
-                        return response;
-                      }
-
-                      // Clone the response
-                      const responseToCache = response.clone();
-
-                      caches.open(CACHE_NAME)
-                        .then((cache) => {
-                          cache.put(event.request, responseToCache);
-                        });
-
-                      return response;
-                    }).catch(() => {
-                      // If both cache and network fail, return offline page
-                      if (event.request.destination === 'document') {
-                        return new Response(
-                          '<html><body><h1>📡 Mode Offline</h1><p>Aplikasi berjalan dalam mode offline. Semua fitur GPS dan penyimpanan tetap berfungsi.</p></body></html>',
-                          { headers: { 'Content-Type': 'text/html' } }
-                        );
-                      }
-                    });
-                  })
-              );
-            });
-
-            // Background sync for offline data
-            self.addEventListener('sync', (event) => {
-              if (event.tag === 'background-sync-coordinates') {
-                console.log('PWA: Background sync triggered');
-                event.waitUntil(
-                  // Notify main app to sync data
-                  self.clients.matchAll().then((clients) => {
-                    clients.forEach((client) => {
-                      client.postMessage({ type: 'BACKGROUND_SYNC' });
-                    });
-                  })
-                );
-              }
-            });
-          `;
-
-          // Create blob URL for service worker
-          const swBlob = new Blob([swCode], { type: 'application/javascript' });
-          const swUrl = URL.createObjectURL(swBlob);
-
-          const registration = await navigator.serviceWorker.register(swUrl);
-          console.log('PWA: Service Worker registered successfully');
-
-          // Listen for messages from service worker
-          navigator.serviceWorker.addEventListener('message', (event) => {
-            if (event.data.type === 'BACKGROUND_SYNC') {
-              console.log('PWA: Background sync requested');
-              autoSyncWhenOnline();
-            }
-          });
-
-          // Register background sync
-          if ('sync' in window.ServiceWorkerRegistration.prototype) {
-            registration.sync.register('background-sync-coordinates');
-          }
-
-          // Show install prompt
-          showPWAInstallPrompt();
-
-        } catch (error) {
-          console.log('PWA: Service Worker registration failed', error);
-        }
-      }
-    }
-
-    // PWA Install Prompt
-    let deferredPrompt;
-    
-    function showPWAInstallPrompt() {
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        
-        // Show install button
-        const installBtn = document.createElement('button');
-        installBtn.innerHTML = '📱 Install Aplikasi';
-        installBtn.className = 'install-btn';
-        installBtn.style.cssText = `
-          position: fixed;
-          bottom: 80px;
-          right: 20px;
-          background: #10b981;
-          color: white;
-          border: none;
-          padding: 12px 20px;
-          border-radius: 25px;
-          font-weight: 600;
-          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-          cursor: pointer;
-          z-index: 1000;
-          font-size: 14px;
-          animation: pulse 2s infinite;
-        `;
-        
-        installBtn.addEventListener('click', async () => {
-          if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log('PWA: Install prompt outcome:', outcome);
-            deferredPrompt = null;
-            installBtn.remove();
-          }
-        });
-        
-        document.body.appendChild(installBtn);
-        
-        // Auto-hide after 10 seconds
-        setTimeout(() => {
-          if (installBtn.parentNode) {
-            installBtn.remove();
-          }
-        }, 10000);
-      });
-
-      // Handle successful installation
-      window.addEventListener('appinstalled', () => {
-        console.log('PWA: App installed successfully');
-        showToast('✅ Aplikasi berhasil diinstall!');
-        deferredPrompt = null;
-      });
-    }
-
-    // PWA Status Indicator
-    function showPWAStatus() {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                          window.navigator.standalone || 
-                          document.referrer.includes('android-app://');
-      
-      if (isStandalone) {
-        console.log('PWA: Running in standalone mode');
-        // Add PWA indicator
-        const pwaIndicator = document.createElement('div');
-        pwaIndicator.innerHTML = '📱 PWA Mode';
-        pwaIndicator.style.cssText = `
-          position: fixed;
-          top: 10px;
-          right: 10px;
-          background: rgba(16, 185, 129, 0.9);
-          color: white;
-          padding: 4px 8px;
-          border-radius: 12px;
-          font-size: 10px;
-          font-weight: 600;
-          z-index: 1001;
-        `;
-        document.body.appendChild(pwaIndicator);
-      }
-    }
-
-
-
     async function init() {
       console.log('Initializing app...');
       console.log('Data SDK available:', !!window.dataSdk);
       console.log('Element SDK available:', !!window.elementSdk);
-      
-      // Register PWA Service Worker
-      await registerServiceWorker();
-      
-      // Show PWA status
-      showPWAStatus();
       
       // Wait a bit for SDKs to load
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -2429,12 +1922,6 @@
       const offlineData = getOfflineData();
       if (offlineData.length > 0) {
         showOfflineStorage();
-      }
-      
-      // Show PWA info
-      const pwaInfo = document.getElementById('pwaInfo');
-      if (pwaInfo) {
-        pwaInfo.style.display = 'block';
       }
       
       // Initialize Data SDK - silent operation
@@ -2516,5 +2003,5 @@
     
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9991402193069ce7',t:'MTc2MjIyOTMxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99909213c1fca12f',t:'MTc2MjIyMjE4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
