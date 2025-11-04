@@ -375,6 +375,33 @@
       animation: slideIn 0.3s ease;
     }
     
+    .gps-notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f59e0b;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      z-index: 1001;
+      animation: slideDown 0.3s ease;
+      max-width: 90%;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .gps-notification.error {
+      background: #ef4444;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .gps-notification.success {
+      background: #10b981;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
     @keyframes slideIn {
       from {
         transform: translateX(400px);
@@ -382,6 +409,17 @@
       }
       to {
         transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideDown {
+      from {
+        transform: translateX(-50%) translateY(-100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
         opacity: 1;
       }
     }
@@ -417,6 +455,14 @@
      </div>
     </div>
     <div class="location-info" id="locationInfo"><strong>Lokasi Saat Ini:</strong> Memuat...
+    </div>
+    <div class="offline-tips" id="offlineTips" style="display: none;">
+     <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin-top: 12px;"><strong>💡 Tips GPS Offline:</strong><br>
+       • Pastikan berada di area terbuka (tidak di dalam gedung)<br>
+       • Tunggu 1-3 menit untuk sinyal satelit GPS<br>
+       • Hindari area dengan banyak gedung tinggi<br>
+       • GPS offline lebih akurat di siang hari
+     </div>
     </div>
    </div>
    <div class="location-section">
@@ -529,6 +575,26 @@
       }, 3000);
     }
     
+    function showGPSNotification(message, type = 'warning') {
+      const existingNotification = document.querySelector('.gps-notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      const notification = document.createElement('div');
+      notification.className = `gps-notification ${type}`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      // Auto remove after 5 seconds for warnings, 3 seconds for success
+      const timeout = type === 'warning' ? 5000 : 3000;
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, timeout);
+    }
+    
     function updateLocationDisplay() {
       const locationInfo = document.getElementById('locationInfo');
       const mapDiv = document.getElementById('map');
@@ -539,20 +605,28 @@
       const mapsBtn = document.getElementById('openMapsBtn');
       
       if (currentLocation) {
-        locationInfo.innerHTML = `<strong>Lokasi Saat Ini:</strong> ${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}`;
-        mapDiv.innerHTML = `📍 Lat: ${currentLocation.latitude.toFixed(4)}, Lng: ${currentLocation.longitude.toFixed(4)}`;
+        const offlineStatus = currentLocation.isOffline ? ' 📡 (Mode Offline)' : ' 🌐 (Online)';
+        locationInfo.innerHTML = `<strong>Lokasi Saat Ini:</strong> ${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}${offlineStatus}`;
+        
+        const mapStatus = currentLocation.isOffline ? '📡 GPS Murni' : '🌐 GPS + Internet';
+        mapDiv.innerHTML = `📍 Lat: ${currentLocation.latitude.toFixed(4)}, Lng: ${currentLocation.longitude.toFixed(4)} | ${mapStatus}`;
         
         latValue.textContent = currentLocation.latitude.toFixed(8);
         lngValue.textContent = currentLocation.longitude.toFixed(8);
         accuracyValue.textContent = currentLocation.accuracy ? `±${currentLocation.accuracy.toFixed(0)}m` : 'N/A';
         timeValue.textContent = new Date().toLocaleTimeString('id-ID');
         
-        // Enable maps button
+        // Enable maps button (works offline too, will open when internet available)
         mapsBtn.disabled = false;
-        mapsBtn.textContent = 'Buka di Google Maps';
+        if (currentLocation.isOffline) {
+          mapsBtn.textContent = 'Buka Maps (Butuh Internet)';
+        } else {
+          mapsBtn.textContent = 'Buka di Google Maps';
+        }
       } else {
-        locationInfo.innerHTML = '<strong>Lokasi Saat Ini:</strong> Tidak tersedia';
-        mapDiv.innerHTML = '📍 Lokasi tidak tersedia';
+        const connectionStatus = checkInternetConnection() ? 'Online' : 'Offline';
+        locationInfo.innerHTML = `<strong>Lokasi Saat Ini:</strong> Tidak tersedia (${connectionStatus})`;
+        mapDiv.innerHTML = `📍 Mencari lokasi... (${connectionStatus})`;
         
         latValue.textContent = '-';
         lngValue.textContent = '-';
@@ -580,28 +654,112 @@
       showToast('🗺️ Membuka Google Maps...');
     }
     
+    function checkInternetConnection() {
+      return navigator.onLine;
+    }
+    
     function startLocationWatch() {
       if ('geolocation' in navigator) {
+        const isOnline = checkInternetConnection();
+        
+        if (isOnline) {
+          showGPSNotification('📍 Mencari lokasi GPS dengan bantuan internet...', 'warning');
+        } else {
+          showGPSNotification('📡 Mode Offline: Mencari lokasi GPS murni (tanpa internet). Proses mungkin lebih lama...', 'warning');
+        }
+        
+        // Konfigurasi GPS untuk mode offline
+        const gpsOptions = {
+          enableHighAccuracy: true,
+          maximumAge: isOnline ? 1000 : 30000, // Cache lebih lama jika offline
+          timeout: isOnline ? 15000 : 60000    // Timeout lebih lama jika offline
+        };
+        
         locationWatchId = navigator.geolocation.watchPosition(
           (position) => {
+            // First time getting location - show success notification
+            if (!currentLocation) {
+              const connectionStatus = checkInternetConnection() ? 'dengan internet' : 'tanpa internet (GPS murni)';
+              showGPSNotification(`✅ GPS berhasil diaktifkan ${connectionStatus}!`, 'success');
+            }
+            
             currentLocation = {
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
-              accuracy: position.coords.accuracy
+              accuracy: position.coords.accuracy,
+              isOffline: !checkInternetConnection()
             };
             updateLocationDisplay();
           },
           (error) => {
             console.error('Error getting location:', error);
+            
+            let errorMessage = '';
+            const isOffline = !checkInternetConnection();
+            
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = '🚫 Akses lokasi ditolak. Silakan aktifkan GPS dan izinkan akses lokasi.';
+                break;
+              case error.POSITION_UNAVAILABLE:
+                if (isOffline) {
+                  errorMessage = '📡 GPS tidak dapat menemukan lokasi. Pastikan Anda berada di area terbuka dan tunggu lebih lama untuk sinyal satelit.';
+                } else {
+                  errorMessage = '📍 Lokasi tidak tersedia. Pastikan GPS aktif dan Anda berada di area terbuka.';
+                }
+                break;
+              case error.TIMEOUT:
+                if (isOffline) {
+                  errorMessage = '⏱️ GPS membutuhkan waktu lebih lama tanpa internet. Tetap di area terbuka dan tunggu...';
+                } else {
+                  errorMessage = '⏱️ Timeout mencari lokasi. Coba refresh halaman dan pastikan GPS aktif.';
+                }
+                break;
+              default:
+                errorMessage = isOffline ? 
+                  '❌ GPS tidak dapat mengunci lokasi. Pastikan berada di area terbuka tanpa penghalang.' :
+                  '❌ Tidak dapat mengakses lokasi. Pastikan GPS aktif.';
+                break;
+            }
+            
+            showGPSNotification(errorMessage, 'error');
             showToast('Tidak dapat mengakses lokasi');
           },
-          {
-            enableHighAccuracy: true,
-            maximumAge: 1000,
-            timeout: 10000
-          }
+          gpsOptions
         );
+        
+        // Monitor perubahan koneksi internet
+        window.addEventListener('online', () => {
+          showGPSNotification('🌐 Internet tersambung kembali - GPS akan lebih cepat', 'success');
+        });
+        
+        window.addEventListener('offline', () => {
+          showGPSNotification('📡 Mode Offline: GPS akan menggunakan sinyal satelit murni', 'warning');
+          // Show offline tips
+          const offlineTips = document.getElementById('offlineTips');
+          if (offlineTips) {
+            offlineTips.style.display = 'block';
+          }
+        });
+        
+        window.addEventListener('online', () => {
+          // Hide offline tips when back online
+          const offlineTips = document.getElementById('offlineTips');
+          if (offlineTips) {
+            offlineTips.style.display = 'none';
+          }
+        });
+        
+        // Show tips immediately if already offline
+        if (!checkInternetConnection()) {
+          const offlineTips = document.getElementById('offlineTips');
+          if (offlineTips) {
+            offlineTips.style.display = 'block';
+          }
+        }
+        
       } else {
+        showGPSNotification('❌ Perangkat tidak mendukung GPS', 'error');
         showToast('Geolocation tidak didukung');
       }
     }
@@ -990,5 +1148,5 @@
     
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'998bc53f429cf8ec',t:'MTc2MjE3MTg0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99904cbfe5b7d439',t:'MTc2MjIxOTM0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
