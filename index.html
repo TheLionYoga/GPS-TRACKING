@@ -424,12 +424,357 @@
       }
     }
     
+    .manual-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .manual-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .dropdown-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .dropdown-item:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    }
+    
+    .dropdown-header {
+      background: #f8fafc;
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+    
+    .dropdown-header:hover {
+      background: #f1f5f9;
+    }
+    
+    .dropdown-header.active {
+      background: #eff6ff;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .dropdown-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 16px;
+    }
+    
+    .dropdown-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    
+    .dropdown-arrow {
+      font-size: 14px;
+      color: #64748b;
+      transition: transform 0.3s ease;
+      font-weight: bold;
+    }
+    
+    .dropdown-arrow.rotated {
+      transform: rotate(180deg);
+    }
+    
+    .dropdown-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: white;
+    }
+    
+    .dropdown-content.open {
+      max-height: 2000px;
+    }
+    
+    .manual-card {
+      background: white;
+      padding: 20px;
+      margin: 0;
+      border: none;
+      border-radius: 0;
+    }
+    
+    .manual-card h3 {
+      margin: 0 0 16px 0;
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    
+    .manual-card h4 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .manual-card p {
+      margin: 0 0 12px 0;
+      line-height: 1.6;
+      color: #475569;
+    }
+    
+    .manual-card ul {
+      margin: 8px 0;
+      padding-left: 20px;
+      color: #475569;
+    }
+    
+    .manual-card li {
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+    
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .step-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    
+    .step-number {
+      background: #3b82f6;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    
+    .step-content {
+      flex: 1;
+    }
+    
+    .step-content strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #1e293b;
+      font-size: 16px;
+    }
+    
+    .step-content p {
+      margin: 0;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    
+    .offline-info {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .info-box {
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+    
+    .info-box.success {
+      background: #f0fdf4;
+      border-left-color: #22c55e;
+    }
+    
+    .info-box.warning {
+      background: #fffbeb;
+      border-left-color: #f59e0b;
+    }
+    
+    .info-box.info {
+      background: #eff6ff;
+      border-left-color: #3b82f6;
+    }
+    
+    .info-box h4 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .info-box ul {
+      margin: 0;
+      padding-left: 16px;
+    }
+    
+    .info-box li {
+      margin-bottom: 2px;
+      font-size: 14px;
+    }
+    
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    
+    .tip-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .tip-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .tip-item strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #1e293b;
+      font-size: 14px;
+    }
+    
+    .tip-item p {
+      margin: 0;
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.4;
+    }
+    
+    .troubleshoot-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .trouble-item {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .trouble-item strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #dc2626;
+      font-size: 14px;
+    }
+    
+    .trouble-item ul {
+      margin: 0;
+      padding-left: 16px;
+    }
+    
+    .trouble-item li {
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: #475569;
+    }
+    
+    .data-format {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+    }
+    
+    .format-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .format-row:last-child {
+      border-bottom: none;
+    }
+    
+    .format-label {
+      font-weight: 600;
+      color: #374151;
+      font-size: 14px;
+    }
+    
+    .format-value {
+      color: #64748b;
+      font-size: 14px;
+      font-style: italic;
+    }
+    
+    .important-notes {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .note-item {
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+    
+    .note-item.danger {
+      background: #fef2f2;
+      border-left-color: #ef4444;
+    }
+    
+    .note-item.success {
+      background: #f0fdf4;
+      border-left-color: #22c55e;
+    }
+    
+    .note-item strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .note-item ul {
+      margin: 0;
+      padding-left: 16px;
+    }
+    
+    .note-item li {
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: #475569;
+    }
+    
     @media (max-width: 640px) {
       .container {
         padding: 12px;
       }
       
-      .header, .save-section, .location-section, .saved-coordinates {
+      .header, .save-section, .location-section, .saved-coordinates, .manual-section {
         padding: 16px;
       }
       
@@ -439,6 +784,25 @@
       
       .coordinate-details {
         grid-template-columns: 1fr;
+      }
+      
+      .tips-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .step-item {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .step-number {
+        align-self: flex-start;
+      }
+      
+      .format-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
       }
     }
   </style>
@@ -469,6 +833,270 @@
       <div style="display: flex; justify-content: space-between; align-items: center;">
        <div><strong id="offlineCounter">📦 0 data tersimpan offline</strong><br><small style="color: #0277bd;">Data akan otomatis dikirim saat internet tersambung</small>
        </div><button id="syncBtn" class="sync-btn" onclick="manualSync()" style="background: #0288d1; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;"> 🔄 Sinkron Sekarang </button>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="manual-section">
+    <h2 id="manualTitle">📖 Manual Penggunaan Sistem</h2>
+    <div class="manual-content"><!-- Dropdown Item 1: Tujuan Sistem -->
+     <div class="dropdown-item">
+      <div class="dropdown-header" onclick="toggleDropdown('tujuan')">
+       <div class="dropdown-title"><span class="dropdown-icon">🎯</span> <span>Tujuan Sistem</span>
+       </div><span class="dropdown-arrow" id="arrow-tujuan">▼</span>
+      </div>
+      <div class="dropdown-content" id="content-tujuan">
+       <div class="manual-card">
+        <p>Sistem Pencatat Koordinat dirancang untuk membantu petugas lapangan mencatat lokasi GPS fasilitas pendidikan dan kesehatan di daerah terpencil, bahkan tanpa koneksi internet.</p>
+       </div>
+      </div>
+     </div><!-- Dropdown Item 2: Cara Memulai -->
+     <div class="dropdown-item">
+      <div class="dropdown-header" onclick="toggleDropdown('memulai')">
+       <div class="dropdown-title"><span class="dropdown-icon">🚀</span> <span>Cara Memulai</span>
+       </div><span class="dropdown-arrow" id="arrow-memulai">▼</span>
+      </div>
+      <div class="dropdown-content" id="content-memulai">
+       <div class="manual-card">
+        <div class="step-list">
+         <div class="step-item"><span class="step-number">1</span>
+          <div class="step-content"><strong>Aktifkan GPS</strong>
+           <p>Pastikan GPS/Lokasi di perangkat Anda sudah diaktifkan. Buka Pengaturan → Lokasi → Aktifkan.</p>
+          </div>
+         </div>
+         <div class="step-item"><span class="step-number">2</span>
+          <div class="step-content"><strong>Izinkan Akses Lokasi</strong>
+           <p>Saat diminta, pilih "Izinkan" untuk memberikan akses lokasi ke aplikasi ini.</p>
+          </div>
+         </div>
+         <div class="step-item"><span class="step-number">3</span>
+          <div class="step-content"><strong>Tunggu Sinyal GPS</strong>
+           <p>Aplikasi akan mencari lokasi Anda. Proses ini membutuhkan 10-60 detik tergantung kondisi sinyal.</p>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Dropdown Item 3: Cara Mencatat Koordinat -->
+     <div class="dropdown-item">
+      <div class="dropdown-header" onclick="toggleDropdown('mencatat')">
+       <div class="dropdown-title"><span class="dropdown-icon">📍</span> <span>Cara Mencatat Koordinat</span>
+       </div><span class="dropdown-arrow" id="arrow-mencatat">▼</span>
+      </div>
+      <div class="dropdown-content" id="content-mencatat">
+       <div class="manual-card">
+        <div class="step-list">
+         <div class="step-item"><span class="step-number">1</span>
+          <div class="step-content"><strong>Pastikan Lokasi Terdeteksi</strong>
+           <p>Lihat bagian "Informasi Lokasi Realtime". Pastikan koordinat sudah muncul dan akurasi GPS baik (di bawah 10 meter).</p>
+          </div>
+         </div>
+         <div class="step-item"><span class="step-number">2</span>
+          <div class="step-content"><strong>Isi Data Lokasi</strong>
+           <p>Pilih Kecamatan dan Desa dari dropdown. Jika tidak ada, pilih "Lainnya" dan ketik manual.</p>
+          </div>
+         </div>
+         <div class="step-item"><span class="step-number">3</span>
+          <div class="step-content"><strong>Pilih Jenis Layanan</strong>
+           <p><strong>PENTING:</strong> Pilih HANYA SATU jenis layanan per lokasi:</p>
+           <ul>
+            <li><strong>Layanan Pendidikan:</strong> SD, SMP, SMA, SMK, SLB</li>
+            <li><strong>Layanan Kesehatan:</strong> Pustu, Puskesmas</li>
+           </ul>
+           <p>Setelah memilih satu, yang lain akan terkunci otomatis.</p>
+          </div>
+         </div>
+         <div class="step-item"><span class="step-number">4</span>
+          <div class="step-content"><strong>Isi Nama Layanan</strong>
+           <p>Ketik nama lengkap fasilitas (contoh: "SD Negeri 1 Nanga Pinoh" atau "Puskesmas Pembantu Langan").</p>
+          </div>
+         </div>
+         <div class="step-item"><span class="step-number">5</span>
+          <div class="step-content"><strong>Isi Data Infrastruktur</strong>
+           <p>Pilih kondisi sinyal telekomunikasi, akses PLN, dan jangkauan sinyal di lokasi tersebut.</p>
+          </div>
+         </div>
+         <div class="step-item"><span class="step-number">6</span>
+          <div class="step-content"><strong>Simpan Data</strong>
+           <p>Klik tombol "📍 Simpan Koordinat". Data akan tersimpan otomatis.</p>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Dropdown Item 4: Mode Offline -->
+     <div class="dropdown-item">
+      <div class="dropdown-header" onclick="toggleDropdown('offline')">
+       <div class="dropdown-title"><span class="dropdown-icon">📡</span> <span>Mode Offline (Tanpa Internet)</span>
+       </div><span class="dropdown-arrow" id="arrow-offline">▼</span>
+      </div>
+      <div class="dropdown-content" id="content-offline">
+       <div class="manual-card">
+        <div class="offline-info">
+         <div class="info-box success">
+          <h4>✅ Yang Bisa Dilakukan Offline:</h4>
+          <ul>
+           <li>Mendapatkan koordinat GPS (menggunakan satelit)</li>
+           <li>Mengisi dan menyimpan semua data formulir</li>
+           <li>Melihat data yang tersimpan offline</li>
+           <li>Aplikasi tetap berfungsi 100%</li>
+          </ul>
+         </div>
+         <div class="info-box warning">
+          <h4>⚠️ Keterbatasan Offline:</h4>
+          <ul>
+           <li>Data tidak langsung terkirim ke Google Sheets</li>
+           <li>GPS membutuhkan waktu lebih lama (1-3 menit)</li>
+           <li>Tidak bisa membuka Google Maps</li>
+          </ul>
+         </div>
+         <div class="info-box info">
+          <h4>🔄 Auto-Sync Saat Online:</h4>
+          <ul>
+           <li>Data offline otomatis terkirim saat internet tersambung</li>
+           <li>Bisa sync manual dengan tombol "🔄 Sinkron Sekarang"</li>
+           <li>Counter menunjukkan jumlah data yang belum terkirim</li>
+          </ul>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Dropdown Item 5: Tips GPS -->
+     <div class="dropdown-item">
+      <div class="dropdown-header" onclick="toggleDropdown('tips')">
+       <div class="dropdown-title"><span class="dropdown-icon">💡</span> <span>Tips GPS di Daerah Terpencil</span>
+       </div><span class="dropdown-arrow" id="arrow-tips">▼</span>
+      </div>
+      <div class="dropdown-content" id="content-tips">
+       <div class="manual-card">
+        <div class="tips-grid">
+         <div class="tip-item"><span class="tip-icon">🌤️</span>
+          <div><strong>Waktu Terbaik</strong>
+           <p>Gunakan siang hari (09:00-15:00) untuk akurasi GPS terbaik.</p>
+          </div>
+         </div>
+         <div class="tip-item"><span class="tip-icon">🏞️</span>
+          <div><strong>Lokasi Ideal</strong>
+           <p>Berdiri di area terbuka, jauh dari gedung tinggi atau pepohonan lebat.</p>
+          </div>
+         </div>
+         <div class="tip-item"><span class="tip-icon">⏱️</span>
+          <div><strong>Bersabar</strong>
+           <p>Tanpa internet, GPS butuh 1-3 menit untuk mengunci satelit.</p>
+          </div>
+         </div>
+         <div class="tip-item"><span class="tip-icon">🔋</span>
+          <div><strong>Hemat Baterai</strong>
+           <p>GPS menguras baterai. Bawa power bank untuk survei panjang.</p>
+          </div>
+         </div>
+         <div class="tip-item"><span class="tip-icon">📱</span>
+          <div><strong>Mode Pesawat</strong>
+           <p>Jika tidak ada sinyal, aktifkan mode pesawat lalu aktifkan GPS saja.</p>
+          </div>
+         </div>
+         <div class="tip-item"><span class="tip-icon">🎯</span>
+          <div><strong>Akurasi</strong>
+           <p>Tunggu hingga akurasi GPS di bawah 10 meter sebelum menyimpan.</p>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Dropdown Item 6: Troubleshooting -->
+     <div class="dropdown-item">
+      <div class="dropdown-header" onclick="toggleDropdown('troubleshoot')">
+       <div class="dropdown-title"><span class="dropdown-icon">🔧</span> <span>Troubleshooting</span>
+       </div><span class="dropdown-arrow" id="arrow-troubleshoot">▼</span>
+      </div>
+      <div class="dropdown-content" id="content-troubleshoot">
+       <div class="manual-card">
+        <div class="troubleshoot-list">
+         <div class="trouble-item"><strong>❌ GPS Tidak Terdeteksi</strong>
+          <ul>
+           <li>Pastikan GPS aktif di pengaturan perangkat</li>
+           <li>Refresh halaman dan izinkan akses lokasi</li>
+           <li>Pindah ke area yang lebih terbuka</li>
+           <li>Tunggu 2-3 menit untuk sinyal satelit</li>
+          </ul>
+         </div>
+         <div class="trouble-item"><strong>📶 Akurasi GPS Buruk (&gt;50m)</strong>
+          <ul>
+           <li>Pindah ke area terbuka tanpa penghalang</li>
+           <li>Tunggu beberapa menit hingga sinyal stabil</li>
+           <li>Hindari area dengan banyak gedung tinggi</li>
+          </ul>
+         </div>
+         <div class="trouble-item"><strong>💾 Data Tidak Tersimpan</strong>
+          <ul>
+           <li>Pastikan semua field wajib sudah diisi</li>
+           <li>Cek apakah GPS sudah terdeteksi</li>
+           <li>Jika offline, data akan tersimpan lokal</li>
+          </ul>
+         </div>
+         <div class="trouble-item"><strong>🔄 Sinkronisasi Gagal</strong>
+          <ul>
+           <li>Pastikan ada koneksi internet</li>
+           <li>Coba sync manual dengan tombol sinkron</li>
+           <li>Data akan otomatis sync saat online</li>
+          </ul>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Dropdown Item 7: Hasil Data -->
+     <div class="dropdown-item">
+      <div class="dropdown-header" onclick="toggleDropdown('hasil')">
+       <div class="dropdown-title"><span class="dropdown-icon">📊</span> <span>Format Hasil Data</span>
+       </div><span class="dropdown-arrow" id="arrow-hasil">▼</span>
+      </div>
+      <div class="dropdown-content" id="content-hasil">
+       <div class="manual-card">
+        <p>Semua data yang disimpan akan dikirim ke Google Sheets dengan format:</p>
+        <div class="data-format">
+         <div class="format-row"><span class="format-label">Kecamatan:</span> <span class="format-value">Nama kecamatan</span>
+         </div>
+         <div class="format-row"><span class="format-label">Desa:</span> <span class="format-value">Nama desa</span>
+         </div>
+         <div class="format-row"><span class="format-label">Jenis Layanan:</span> <span class="format-value">Pendidikan/Kesehatan</span>
+         </div>
+         <div class="format-row"><span class="format-label">Nama Fasilitas:</span> <span class="format-value">Nama lengkap fasilitas</span>
+         </div>
+         <div class="format-row"><span class="format-label">Koordinat:</span> <span class="format-value">Latitude, Longitude</span>
+         </div>
+         <div class="format-row"><span class="format-label">Infrastruktur:</span> <span class="format-value">Sinyal, PLN, Jangkauan</span>
+         </div>
+         <div class="format-row"><span class="format-label">Waktu:</span> <span class="format-value">Timestamp pencatatan</span>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Dropdown Item 8: Hal Penting -->
+     <div class="dropdown-item">
+      <div class="dropdown-header" onclick="toggleDropdown('penting')">
+       <div class="dropdown-title"><span class="dropdown-icon">⚠️</span> <span>Hal Penting</span>
+       </div><span class="dropdown-arrow" id="arrow-penting">▼</span>
+      </div>
+      <div class="dropdown-content" id="content-penting">
+       <div class="manual-card">
+        <div class="important-notes">
+         <div class="note-item danger"><strong>🚫 Jangan:</strong>
+          <ul>
+           <li>Mencatat lokasi yang sama berulang kali</li>
+           <li>Mengisi data pendidikan DAN kesehatan sekaligus</li>
+           <li>Menyimpan koordinat dengan akurasi buruk (&gt;20m)</li>
+          </ul>
+         </div>
+         <div class="note-item success"><strong>✅ Lakukan:</strong>
+          <ul>
+           <li>Satu lokasi = satu jenis layanan saja</li>
+           <li>Pastikan nama fasilitas lengkap dan benar</li>
+           <li>Tunggu GPS akurat sebelum menyimpan</li>
+           <li>Backup data dengan sync berkala</li>
+          </ul>
+         </div>
+        </div>
+       </div>
       </div>
      </div>
     </div>
@@ -514,6 +1142,7 @@
       save_button_text: "Simpan Koordinat",
       empty_message: "Belum ada koordinat yang disimpan",
       location_title: "Informasi Lokasi Realtime",
+      manual_title: "Manual Penggunaan Sistem",
       primary_color: "#10b981",
       background_gradient_start: "#667eea",
       background_gradient_end: "#764ba2",
@@ -537,6 +1166,7 @@
       const saveButtonText = config.save_button_text || defaultConfig.save_button_text;
       const emptyMessage = config.empty_message || defaultConfig.empty_message;
       const locationTitle = config.location_title || defaultConfig.location_title;
+      const manualTitle = config.manual_title || defaultConfig.manual_title;
       const primaryColor = config.primary_color || defaultConfig.primary_color;
       const bgStart = config.background_gradient_start || defaultConfig.background_gradient_start;
       const bgEnd = config.background_gradient_end || defaultConfig.background_gradient_end;
@@ -546,8 +1176,8 @@
       
       document.getElementById('appTitle').textContent = appTitle;
       document.getElementById('saveBtn').innerHTML = `📍 ${saveButtonText}`;
-      document.getElementById('emptyMessage').textContent = emptyMessage;
       document.getElementById('locationTitle').textContent = locationTitle;
+      document.getElementById('manualTitle').textContent = `📖 ${manualTitle}`;
       
       document.body.style.background = `linear-gradient(135deg, ${bgStart} 0%, ${bgEnd} 100%)`;
       document.body.style.fontFamily = `'${fontFamily}', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
@@ -1251,6 +1881,34 @@
       syncBtn.innerHTML = '🔄 Sinkron Sekarang';
     }
     
+    // Dropdown functionality
+    function toggleDropdown(id) {
+      const content = document.getElementById(`content-${id}`);
+      const arrow = document.getElementById(`arrow-${id}`);
+      const header = content.previousElementSibling;
+      
+      if (content.classList.contains('open')) {
+        // Close dropdown
+        content.classList.remove('open');
+        arrow.classList.remove('rotated');
+        header.classList.remove('active');
+      } else {
+        // Close all other dropdowns first
+        const allContents = document.querySelectorAll('.dropdown-content');
+        const allArrows = document.querySelectorAll('.dropdown-arrow');
+        const allHeaders = document.querySelectorAll('.dropdown-header');
+        
+        allContents.forEach(c => c.classList.remove('open'));
+        allArrows.forEach(a => a.classList.remove('rotated'));
+        allHeaders.forEach(h => h.classList.remove('active'));
+        
+        // Open this dropdown
+        content.classList.add('open');
+        arrow.classList.add('rotated');
+        header.classList.add('active');
+      }
+    }
+
     async function init() {
       console.log('Initializing app...');
       console.log('Data SDK available:', !!window.dataSdk);
@@ -1333,7 +1991,8 @@
             ["app_title", config.app_title || defaultConfig.app_title],
             ["save_button_text", config.save_button_text || defaultConfig.save_button_text],
             ["empty_message", config.empty_message || defaultConfig.empty_message],
-            ["location_title", config.location_title || defaultConfig.location_title]
+            ["location_title", config.location_title || defaultConfig.location_title],
+            ["manual_title", config.manual_title || defaultConfig.manual_title]
           ])
         });
       }
@@ -1344,5 +2003,5 @@
     
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99905cfb330d86fb',t:'MTc2MjIyMDAwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99909213c1fca12f',t:'MTc2MjIyMjE4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
